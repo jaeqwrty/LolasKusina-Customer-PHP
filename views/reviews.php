@@ -46,7 +46,7 @@ $reviews = [
 $starBreakdown = [5 => 72, 4 => 18, 3 => 6, 2 => 3, 1 => 1];
 ?>
 
-<div class="container mx-auto px-4 py-6 max-w-md mb-20">
+<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-5xl mb-20 md:mb-8">
 
     <!-- Page Title -->
     <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">Mga Sabi Nila</h1>

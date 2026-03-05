@@ -5,7 +5,7 @@ $currentPage = "packages";
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 py-6 max-w-md mb-20">
+<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-3xl mb-20 md:mb-8">
     <!-- Back Button and Actions -->
     <div class="flex justify-between items-center mb-4">
         <a href="/" class="bg-white rounded-full p-2 shadow-md">

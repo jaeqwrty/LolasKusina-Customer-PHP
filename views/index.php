@@ -5,18 +5,29 @@ $currentPage = "packages";
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 py-6 max-w-md mb-20">
-    <!-- Custom Orders Banner -->
-    <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white mb-6 shadow-lg">
-        <h2 class="text-2xl font-bold mb-2">Gusto mo ba ng iba?</h2>
-        <p class="text-sm mb-4 opacity-90">Create your own perfect menu combination for your special event.</p>
-        <a href="/build_package.php" class="inline-block bg-white text-primary px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-md">
-            BUILD YOUR OWN PACKAGE
-        </a>
+<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-none mb-20 md:mb-8">
+    <!-- Top section: banner + category (stacked on mobile, side-by-side on desktop) -->
+    <div class="md:flex md:items-start md:gap-6 mb-6">
+        <!-- Custom Orders Banner -->
+        <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white mb-6 md:mb-0 shadow-lg md:flex-1">
+            <h2 class="text-2xl font-bold mb-2">Gusto mo ba ng iba?</h2>
+            <p class="text-sm mb-4 opacity-90">Create your own perfect menu combination for your special event.</p>
+            <a href="/build_package.php" class="inline-block bg-white text-primary px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-md">
+                BUILD YOUR OWN PACKAGE
+            </a>
+        </div>
+
+        <!-- Category Menu (inline on desktop) -->
+        <div class="hidden md:flex flex-col space-y-2 w-48 shrink-0">
+            <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Filter</p>
+            <button onclick="filterPackages('all')" class="bg-primary text-white px-4 py-2 rounded-full font-semibold shadow-md category-btn active text-left" data-category="all">All Packages</button>
+            <button onclick="filterPackages('fiesta')" class="bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-gray-100 category-btn text-left" data-category="fiesta">Fiesta Trays</button>
+            <button onclick="filterPackages('dessert')" class="bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-gray-100 category-btn text-left" data-category="dessert">Desserts</button>
+        </div>
     </div>
 
-    <!-- Category Menu -->
-    <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+    <!-- Category Menu (horizontal scroll on mobile only) -->
+    <div class="flex md:hidden space-x-2 mb-6 overflow-x-auto pb-2">
         <button onclick="filterPackages('all')" class="bg-primary text-white px-6 py-2 rounded-full font-semibold whitespace-nowrap shadow-md category-btn active" data-category="all">
             All Packages
         </button>
@@ -35,6 +46,8 @@ include __DIR__ . '/layouts/header.php';
             <a href="/build_package.php" class="text-primary font-semibold text-sm hover:underline">View All</a>
         </div>
 
+        <!-- Package grid: 1 col mobile, 3 cols desktop -->
+        <div class="md:grid md:grid-cols-3 md:gap-6">
         <?php
         $packages = [
             [
@@ -74,7 +87,7 @@ include __DIR__ . '/layouts/header.php';
 
         foreach ($packages as $package):
         ?>
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition">
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col">
             <!-- Package Image -->
             <div class="relative">
                 <img src="/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.src='/images/placeholder.svg'">
@@ -91,7 +104,7 @@ include __DIR__ . '/layouts/header.php';
             </div>
 
             <!-- Package Info -->
-            <div class="p-4">
+            <div class="p-4 flex flex-col flex-1">
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         <h4 class="text-lg font-bold text-gray-800"><?php echo $package['name']; ?></h4>
@@ -102,9 +115,9 @@ include __DIR__ . '/layouts/header.php';
                     </div>
                 </div>
 
-                <p class="text-sm text-gray-600 mb-3"><?php echo $package['details']; ?></p>
+                <p class="text-sm text-gray-600 mb-3 flex-1"><?php echo $package['details']; ?></p>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     <div class="flex items-center space-x-1">
                         <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
@@ -120,6 +133,7 @@ include __DIR__ . '/layouts/header.php';
             </div>
         </div>
         <?php endforeach; ?>
+        </div><!-- End package grid -->
     </div>
 
     <!-- Reviews Section -->

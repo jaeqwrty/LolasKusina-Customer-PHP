@@ -5,7 +5,7 @@ $currentPage = "account";
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 py-6 max-w-md mb-20">
+<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">
 
     <!-- Header -->
     <h1 class="text-xl font-bold text-gray-800 text-center mb-6">My Profile</h1>

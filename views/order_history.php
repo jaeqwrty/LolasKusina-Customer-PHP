@@ -32,7 +32,7 @@ $orders = [
 ];
 ?>
 
-<div class="container mx-auto px-4 py-6 max-w-md mb-20">
+<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-4xl mb-20 md:mb-8">
 
     <!-- Header -->
     <div class="flex items-center mb-6">

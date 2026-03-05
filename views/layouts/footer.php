@@ -1,5 +1,5 @@
-    <!-- Footer Navigation -->
-    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 safe-bottom z-50 md:left-1/2 md:-translate-x-1/2 md:max-w-[480px] md:rounded-t-2xl">
+    <!-- Footer Navigation (mobile only) -->
+    <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 safe-bottom z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-around items-center py-3">
                 <a href="/" class="flex flex-col items-center <?php echo ($currentPage ?? '') == 'packages' ? 'text-primary' : 'text-gray-500'; ?> hover:text-primary transition touch-feedback min-w-[60px]">
@@ -36,10 +36,10 @@
         </div>
     </footer>
     
-    <!-- Spacer for fixed footer -->
-    <div class="h-24"></div>
+    <!-- Mobile spacer for fixed footer -->
+    <div class="h-24 md:h-0"></div>
     
-    </div><!-- End mobile-container -->
+    </div><!-- End desktop-main / md:ml-64 wrapper -->
     
     <!-- Service Worker Registration for PWA -->
     <script>

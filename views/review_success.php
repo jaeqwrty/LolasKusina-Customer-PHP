@@ -5,7 +5,7 @@ $currentPage = "reviews";
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 max-w-md">
+<div class="container mx-auto px-4 md:px-8 max-w-md md:max-w-2xl">
     <div class="min-h-screen flex flex-col items-center justify-center py-12 -mt-16">
 
         <!-- Success Card -->
