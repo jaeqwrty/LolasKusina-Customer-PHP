@@ -12,7 +12,7 @@ include __DIR__ . '/layouts/header.php';
         <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white mb-6 md:mb-0 shadow-lg md:flex-1">
             <h2 class="text-2xl font-bold mb-2">Gusto mo ba ng iba?</h2>
             <p class="text-sm mb-4 opacity-90">Create your own perfect menu combination for your special event.</p>
-            <a href="/build_package.php" class="inline-block bg-white text-primary px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-md">
+            <a href="<?php echo BASE_PATH; ?>/build_package.php" class="inline-block bg-white text-primary px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-md">
                 BUILD YOUR OWN PACKAGE
             </a>
         </div>
@@ -43,7 +43,7 @@ include __DIR__ . '/layouts/header.php';
     <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-gray-800">Our Best Sellers</h3>
-            <a href="/build_package.php" class="text-primary font-semibold text-sm hover:underline">View All</a>
+            <a href="<?php echo BASE_PATH; ?>/build_package.php" class="text-primary font-semibold text-sm hover:underline">View All</a>
         </div>
 
         <!-- Package grid: 1 col mobile, 3 cols desktop -->
@@ -90,8 +90,8 @@ include __DIR__ . '/layouts/header.php';
         <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col">
             <!-- Package Image -->
             <div class="relative overflow-hidden bg-[#FFF3EE]">
-                <a href="/package_details.php?id=<?php echo $package['id']; ?>" class="block">
-                    <img src="/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="block">
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </a>
                 <?php if (isset($package['badge'])): ?>
                 <span class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
@@ -128,7 +128,7 @@ include __DIR__ . '/layouts/header.php';
                         <span class="text-xs text-gray-500">(<?php echo $package['reviews']; ?>)</span>
                     </div>
 
-                    <a href="/package_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
+                    <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
                         Order Now
                     </a>
                 </div>
@@ -141,7 +141,7 @@ include __DIR__ . '/layouts/header.php';
     <!-- Reviews Section -->
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 text-center mb-6 border border-purple-200">
         <p class="text-gray-700 mb-3">Curious about what others think?</p>
-        <a href="/reviews.php" class="inline-block bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-orange-600 transition shadow-md touch-feedback">
+        <a href="<?php echo BASE_PATH; ?>/reviews.php" class="inline-block bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-orange-600 transition shadow-md touch-feedback">
             Tingnan ang Reviews
         </a>
     </div>

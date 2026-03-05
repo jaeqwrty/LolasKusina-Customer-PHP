@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Serve static assets transparently from the public/ subdirectory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|json|webp))$ public/$1 [L]
+
+# Route all other requests through the front controller
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Prevent access to sensitive files
+<FilesMatch "\.(env|sql|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -25,12 +25,12 @@ include __DIR__ . '/layouts/header.php';
             </p>
 
             <!-- Buttons -->
-            <a href="/reviews.php"
+            <a href="<?php echo BASE_PATH; ?>/reviews.php"
                class="block w-full bg-primary text-white py-4 rounded-xl font-bold text-base hover:bg-orange-600 active:bg-orange-700 transition touch-feedback shadow-md mb-4">
                 BUMALIK SA REVIEWS
             </a>
 
-            <a href="/"
+            <a href="<?php echo BASE_PATH ?: '/'; ?>"
                class="block text-primary font-bold text-base hover:underline touch-feedback py-2">
                 PUMUNTA SA HOME
             </a>

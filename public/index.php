@@ -2,6 +2,9 @@
 // Simple Router / Index File
 session_start();
 
+// Base path for URL generation (supports subdirectory deployments, e.g. /LolasKusina)
+define('BASE_PATH', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
+
 // Get the requested URI
 $request = $_SERVER['REQUEST_URI'];
 $scriptName = dirname($_SERVER['SCRIPT_NAME']);

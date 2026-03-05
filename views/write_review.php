@@ -2,7 +2,7 @@
 // Auth guard — redirect unauthenticated users to the auth gate
 if (empty($_SESSION['user_id'])) {
     $qs = isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : '';
-    header('Location: /auth_gate.php?redirect=' . urlencode('/write_review.php' . $qs));
+    header('Location: ' . BASE_PATH . '/auth_gate.php?redirect=' . urlencode(BASE_PATH . '/write_review.php' . $qs));
     exit;
 }
 
@@ -25,7 +25,7 @@ $package = $packages[$packageId] ?? $packages[1];
 
     <!-- Header -->
     <div class="flex items-center mb-6">
-        <a href="/reviews.php" class="bg-white rounded-full p-2 shadow-md touch-feedback mr-3">
+        <a href="<?php echo BASE_PATH; ?>/reviews.php" class="bg-white rounded-full p-2 shadow-md touch-feedback mr-3">
             <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
@@ -36,10 +36,10 @@ $package = $packages[$packageId] ?? $packages[1];
     <!-- Package Being Reviewed -->
     <div class="bg-white rounded-2xl shadow-md p-4 mb-5 flex items-center space-x-3">
         <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[#FFF3EE]">
-            <img src="/images/<?php echo $package['image']; ?>"
+            <img src="<?php echo BASE_PATH; ?>/images/<?php echo $package['image']; ?>"
                  alt="<?php echo htmlspecialchars($package['name']); ?>"
                  class="w-full h-full object-cover"
-                 onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                 onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
         </div>
         <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 truncate"><?php echo htmlspecialchars($package['name']); ?></h3>
@@ -176,7 +176,7 @@ function submitReview() {
     btn.classList.add('opacity-75');
     
     setTimeout(() => {
-        window.location.href = '/review_success.php';
+        window.location.href = '<?php echo BASE_PATH; ?>/review_success.php';
     }, 1000);
 }
 

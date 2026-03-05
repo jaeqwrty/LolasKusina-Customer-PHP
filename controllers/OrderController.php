@@ -20,7 +20,7 @@ class OrderController {
     // Add item to cart
     public function addToCart() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/');
             exit();
         }
         
@@ -56,25 +56,25 @@ class OrderController {
             $_SESSION['cart'][] = $cartItem;
         }
         
-        header('Location: /cart.php');
+        header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
         exit();
     }
-    
+
     // Remove item from cart
     public function removeFromCart() {
         if (!isset($_GET['index'])) {
-            header('Location: /views/cart.php');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
             exit();
         }
-        
+
         $index = (int)$_GET['index'];
-        
+
         if (isset($_SESSION['cart'][$index])) {
             unset($_SESSION['cart'][$index]);
             $_SESSION['cart'] = array_values($_SESSION['cart']); // Re-index array
         }
-        
-        header('Location: /cart.php');
+
+        header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
         exit();
     }
     
@@ -100,21 +100,21 @@ class OrderController {
     // Clear cart
     public function clearCart() {
         $_SESSION['cart'] = [];
-        header('Location: /views/cart.php');
+        header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
         exit();
     }
     
     // Place order
     public function placeOrder() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /views/cart.php');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
             exit();
         }
         
         $cartItems = $_SESSION['cart'] ?? [];
         
         if (empty($cartItems)) {
-            header('Location: /views/cart.php');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
             exit();
         }
         
@@ -152,11 +152,11 @@ class OrderController {
             $_SESSION['cart'] = [];
             
             // Redirect to order confirmation
-            header("Location: /views/order_confirmation.php?order_id=" . $orderId);
+            header("Location: " . (defined('BASE_PATH') ? BASE_PATH : '') . "/order_confirmation.php?order_id=" . $orderId);
             exit();
         } else {
             $_SESSION['error'] = 'Failed to place order. Please try again.';
-            header('Location: /views/cart.php');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
             exit();
         }
     }
@@ -166,7 +166,7 @@ class OrderController {
         $order = $this->orderModel->getOrderById($orderId);
         
         if (!$order) {
-            header('Location: /');
+            header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/');
             exit();
         }
         

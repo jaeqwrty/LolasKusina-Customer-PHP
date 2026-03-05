@@ -67,7 +67,7 @@ if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
 
             <!-- Hero food image -->
             <img
-                src="/images/hero-food.jpg"
+                src="<?php echo BASE_PATH; ?>/images/hero-food.jpg"
                 alt="Filipino food spread"
                 class="w-full h-64 object-cover opacity-75"
                 onerror="this.style.display='none'"
@@ -132,7 +132,7 @@ if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
             <!-- CTA Buttons -->
             <div class="flex flex-col space-y-3 mt-auto">
 
-                <a href="/register.php?redirect=<?php echo urlencode($redirect); ?>"
+                <a href="<?php echo BASE_PATH; ?>/register.php?redirect=<?php echo urlencode($redirect); ?>"
                    class="w-full bg-primary text-white py-4 rounded-2xl font-bold text-base text-center flex items-center justify-center space-x-2 touch-feedback shadow-md hover:bg-orange-600 active:bg-orange-700 transition">
                     <span>Create Account</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@ if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
                     </svg>
                 </a>
 
-                <a href="/login.php?redirect=<?php echo urlencode($redirect); ?>"
+                <a href="<?php echo BASE_PATH; ?>/login.php?redirect=<?php echo urlencode($redirect); ?>"
                    class="w-full bg-white border border-gray-200 text-gray-800 py-4 rounded-2xl font-semibold text-base text-center touch-feedback hover:bg-gray-50 transition">
                     Log In
                 </a>

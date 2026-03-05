@@ -36,7 +36,7 @@ $orders = [
 
     <!-- Header -->
     <div class="flex items-center mb-6">
-        <a href="/profile.php" class="bg-white rounded-full p-2 shadow-md touch-feedback mr-3">
+        <a href="<?php echo BASE_PATH; ?>/profile.php" class="bg-white rounded-full p-2 shadow-md touch-feedback mr-3">
             <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
@@ -90,12 +90,12 @@ $orders = [
 
             <!-- Actions -->
             <div class="flex space-x-3">
-                <a href="/order_details.php?id=<?php echo $order['id']; ?>"
+                <a href="<?php echo BASE_PATH; ?>/order_details.php?id=<?php echo $order['id']; ?>"
                    class="flex-1 border-2 border-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold text-sm text-center hover:border-primary hover:text-primary transition touch-feedback">
                     View Details
                 </a>
                 <?php if ($order['status'] === 'Delivered'): ?>
-                <a href="/write_review.php?package=<?php echo $order['id']; ?>"
+                <a href="<?php echo BASE_PATH; ?>/write_review.php?package=<?php echo $order['id']; ?>"
                    class="flex-1 bg-primary text-white py-2.5 rounded-xl font-semibold text-sm text-center hover:bg-orange-600 transition touch-feedback shadow-sm">
                     Mag-review
                 </a>

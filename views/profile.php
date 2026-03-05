@@ -1,7 +1,7 @@
 <?php
 // Auth guard — redirect unauthenticated users to the auth gate
 if (empty($_SESSION['user_id'])) {
-    header('Location: /auth_gate.php?redirect=' . urlencode('/profile.php'));
+    header('Location: ' . BASE_PATH . '/auth_gate.php?redirect=' . urlencode(BASE_PATH . '/profile.php'));
     exit;
 }
 
@@ -40,7 +40,7 @@ include __DIR__ . '/layouts/header.php';
 
     <!-- My Orders Shortcut -->
     <div class="bg-white rounded-2xl shadow-md mb-4 overflow-hidden">
-        <a href="/order_history.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
+        <a href="<?php echo BASE_PATH; ?>/order_history.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
@@ -57,7 +57,7 @@ include __DIR__ . '/layouts/header.php';
 
         <div class="border-t border-gray-100"></div>
 
-        <a href="/reviews.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
+        <a href="<?php echo BASE_PATH; ?>/reviews.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">

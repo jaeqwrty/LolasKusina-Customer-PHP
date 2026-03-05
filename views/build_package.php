@@ -74,7 +74,7 @@ include __DIR__ . '/layouts/header.php';
         <div class="menu-item flex items-center justify-between py-3 border-b border-gray-100 last:border-0" data-price="<?php echo $dish['price']; ?>" data-name="<?php echo $dish['name']; ?>">
             <div class="flex items-center space-x-3 flex-1">
                 <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
-                    <img src="/images/<?php echo $dish['image']; ?>" alt="<?php echo $dish['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $dish['image']; ?>" alt="<?php echo $dish['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </div>
                 <div class="flex-1">
                     <h3 class="font-semibold text-gray-800"><?php echo $dish['name']; ?></h3>
@@ -104,10 +104,10 @@ include __DIR__ . '/layouts/header.php';
 
     <!-- Navigation Buttons -->
     <div class="flex space-x-3">
-        <a href="/" class="flex-1 bg-gray-200 text-gray-700 py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-300 transition">
+        <a href="<?php echo BASE_PATH ?: '/'; ?>" class="flex-1 bg-gray-200 text-gray-700 py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-300 transition">
             BACK
         </a>
-        <a href="/cart.php" id="addToCartBtn" class="flex-1 bg-primary text-white py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:bg-orange-600 transition">
+        <a href="<?php echo BASE_PATH; ?>/cart.php" id="addToCartBtn" class="flex-1 bg-primary text-white py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:bg-orange-600 transition">
             ADD TO CART
         </a>
     </div>

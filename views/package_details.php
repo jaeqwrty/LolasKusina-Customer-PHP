@@ -104,11 +104,11 @@ include __DIR__ . '/layouts/header.php';
 <!-- Hero image: edge-to-edge, sits behind the fixed top bar -->
 <div class="relative w-full bg-orange-50" style="min-height:260px;">
     <img
-        src="/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>"
+        src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>"
         alt="<?php echo htmlspecialchars($package['name']); ?>"
         class="w-full object-cover"
         style="height:260px;"
-        onerror="this.onerror=null;this.onerror=null;this.src='/images/placeholder.svg'"
+        onerror="this.onerror=null;this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'"
     >
 
     <!-- Gradient overlay so text is readable -->
@@ -224,10 +224,10 @@ include __DIR__ . '/layouts/header.php';
             <li class="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-[#FFF3EE]">
                     <img
-                        src="/images/<?php echo htmlspecialchars($item['image'] ?? 'placeholder.svg'); ?>"
+                        src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($item['image'] ?? 'placeholder.svg'); ?>"
                         alt="<?php echo htmlspecialchars($item['name']); ?>"
                         class="w-full h-full object-cover"
-                        onerror="this.onerror=null;this.src='/images/placeholder.svg'"
+                        onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'"
                     >
                 </div>
                 <div class="flex-1 min-w-0">
@@ -280,7 +280,7 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- ── Reviews shortcut ──────────────────────────────── -->
-    <a href="/reviews.php?package=<?php echo (int)($package['id'] ?? 0); ?>"
+    <a href="<?php echo BASE_PATH; ?>/reviews.php?package=<?php echo (int)($package['id'] ?? 0); ?>"
        class="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 mb-4 touch-feedback hover:bg-gray-50 transition">
         <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -399,7 +399,7 @@ function addToCart() {
     sessionStorage.setItem('cart', JSON.stringify(cart));
 
     // Also POST to server-side cart if available
-    fetch('/cart.php', {
+    fetch(BASE_PATH + '/cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'add', item_type: 'package', item_id: PACKAGE_ID, quantity: qty })
@@ -407,7 +407,7 @@ function addToCart() {
 
     showToast('✓ ' + PACKAGE_NAME + ' added to cart!');
     document.getElementById('addToCartBtn').textContent = 'VIEW CART';
-    document.getElementById('addToCartBtn').onclick = () => { window.location.href = '/cart.php'; };
+    document.getElementById('addToCartBtn').onclick = () => { window.location.href = BASE_PATH + '/cart.php'; };
 }
 
 // ── Toast helper ──────────────────────────────────────────

@@ -81,7 +81,7 @@ $starBreakdown = [5 => 72, 4 => 18, 3 => 6, 2 => 3, 1 => 1];
         </div>
 
         <!-- Leave Review Button -->
-        <a href="/write_review.php" class="mt-4 flex items-center justify-center space-x-2 w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 active:bg-orange-700 transition touch-feedback shadow-md">
+        <a href="<?php echo BASE_PATH; ?>/write_review.php" class="mt-4 flex items-center justify-center space-x-2 w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 active:bg-orange-700 transition touch-feedback shadow-md">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
             </svg>
@@ -148,10 +148,10 @@ $starBreakdown = [5 => 72, 4 => 18, 3 => 6, 2 => 3, 1 => 1];
             <div class="flex space-x-2">
                 <?php foreach ($review['photos'] as $photo): ?>
                 <div class="w-20 h-20 rounded-xl overflow-hidden bg-[#FFF3EE] cursor-pointer hover:opacity-90 transition">
-                    <img src="/images/<?php echo $photo; ?>"
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $photo; ?>"
                          alt="Review photo"
                          class="w-full h-full object-cover"
-                         onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                         onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </div>
                 <?php endforeach; ?>
             </div>

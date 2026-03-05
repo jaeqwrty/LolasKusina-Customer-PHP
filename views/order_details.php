@@ -29,7 +29,7 @@ include __DIR__ . '/layouts/header.php';
 
     <!-- Package Image -->
     <div class="rounded-2xl overflow-hidden mb-6 bg-[#FFF3EE]" style="height:220px;">
-        <img src="/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>" alt="<?php echo htmlspecialchars($package['name'] ?? 'Package'); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+        <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>" alt="<?php echo htmlspecialchars($package['name'] ?? 'Package'); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
     </div>
 
     <!-- Package Info -->
@@ -75,7 +75,7 @@ include __DIR__ . '/layouts/header.php';
         <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
             <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
-                    <img src="/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </div>
                 <div>
                     <h3 class="font-semibold text-gray-800"><?php echo $item['name']; ?></h3>
@@ -110,7 +110,7 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Order Button -->
-    <a href="/cart.php" id="addToCartBtn" class="block w-full bg-primary text-white py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:bg-orange-600 transition">
+    <a href="<?php echo BASE_PATH; ?>/cart.php" id="addToCartBtn" class="block w-full bg-primary text-white py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:bg-orange-600 transition">
         ADD TO CART - ₱2,500.00
     </a>
 </div>
