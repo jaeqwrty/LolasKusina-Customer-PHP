@@ -1,4 +1,11 @@
 <?php
+// Auth guard — redirect unauthenticated users to the auth gate
+if (empty($_SESSION['user_id'])) {
+    $qs = isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: /auth_gate.php?redirect=' . urlencode('/write_review.php' . $qs));
+    exit;
+}
+
 // Write a Review Page
 $pageTitle = "Mag-Review - Lola's Kusina";
 $currentPage = "reviews";
@@ -28,10 +35,12 @@ $package = $packages[$packageId] ?? $packages[1];
 
     <!-- Package Being Reviewed -->
     <div class="bg-white rounded-2xl shadow-md p-4 mb-5 flex items-center space-x-3">
-        <img src="/images/<?php echo $package['image']; ?>"
-             alt="<?php echo htmlspecialchars($package['name']); ?>"
-             class="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-             onerror="this.src='/images/placeholder.svg'">
+        <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[#FFF3EE]">
+            <img src="/images/<?php echo $package['image']; ?>"
+                 alt="<?php echo htmlspecialchars($package['name']); ?>"
+                 class="w-full h-full object-cover"
+                 onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+        </div>
         <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 truncate"><?php echo htmlspecialchars($package['name']); ?></h3>
             <div class="flex items-center space-x-2 mt-0.5">

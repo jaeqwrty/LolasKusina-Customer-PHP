@@ -73,7 +73,9 @@ include __DIR__ . '/layouts/header.php';
         ?>
         <div class="menu-item flex items-center justify-between py-3 border-b border-gray-100 last:border-0" data-price="<?php echo $dish['price']; ?>" data-name="<?php echo $dish['name']; ?>">
             <div class="flex items-center space-x-3 flex-1">
-                <img src="/images/<?php echo $dish['image']; ?>" alt="<?php echo $dish['name']; ?>" class="w-16 h-16 rounded-lg object-cover" onerror="this.src='/images/placeholder.svg'">
+                <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
+                    <img src="/images/<?php echo $dish['image']; ?>" alt="<?php echo $dish['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                </div>
                 <div class="flex-1">
                     <h3 class="font-semibold text-gray-800"><?php echo $dish['name']; ?></h3>
                     <p class="text-xs text-gray-500"><?php echo $dish['description']; ?></p>

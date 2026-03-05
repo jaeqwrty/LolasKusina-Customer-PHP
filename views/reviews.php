@@ -147,10 +147,12 @@ $starBreakdown = [5 => 72, 4 => 18, 3 => 6, 2 => 3, 1 => 1];
             <?php if (!empty($review['photos'])): ?>
             <div class="flex space-x-2">
                 <?php foreach ($review['photos'] as $photo): ?>
-                <img src="/images/<?php echo $photo; ?>"
-                     alt="Review photo"
-                     class="w-20 h-20 rounded-xl object-cover cursor-pointer hover:opacity-90 transition"
-                     onerror="this.src='/images/placeholder.svg'">
+                <div class="w-20 h-20 rounded-xl overflow-hidden bg-[#FFF3EE] cursor-pointer hover:opacity-90 transition">
+                    <img src="/images/<?php echo $photo; ?>"
+                         alt="Review photo"
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                </div>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>

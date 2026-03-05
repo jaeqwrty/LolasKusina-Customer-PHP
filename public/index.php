@@ -33,6 +33,11 @@ switch ($request) {
     case 'views/order_details.php':
         include __DIR__ . '/../views/order_details.php';
         break;
+
+    case 'package_details.php':
+    case 'views/package_details.php':
+        include __DIR__ . '/../views/package_details.php';
+        break;
         
     case 'build_package.php':
     case 'views/build_package.php':
@@ -72,6 +77,11 @@ switch ($request) {
     case 'profile.php':
     case 'views/profile.php':
         include __DIR__ . '/../views/profile.php';
+        break;
+
+    case 'auth_gate.php':
+    case 'views/auth_gate.php':
+        include __DIR__ . '/../views/auth_gate.php';
         break;
     
     default:

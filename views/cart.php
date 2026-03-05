@@ -45,7 +45,9 @@ include __DIR__ . '/layouts/header.php';
         foreach ($cartItems as $index => $item):
         ?>
         <div class="cart-item flex items-center space-x-3 py-3 border-b border-gray-100 last:border-0" data-index="<?php echo $index; ?>" data-price="<?php echo $item['price']; ?>">
-            <img src="/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-20 h-20 rounded-lg object-cover" onerror="this.src='/images/placeholder.svg'">
+            <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
+                <img src="/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+            </div>
             <div class="flex-1">
                 <h3 class="font-semibold text-gray-800"><?php echo $item['name']; ?></h3>
                 <p class="text-xs text-gray-500 mb-2"><?php echo $item['description']; ?></p>

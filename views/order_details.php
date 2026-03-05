@@ -28,8 +28,8 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Package Image -->
-    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 mb-6 flex items-center justify-center">
-        <img src="/images/paborito-package.png" alt="Paborito Package" class="w-48 h-48 object-contain" onerror="this.src='/images/placeholder.svg'">
+    <div class="rounded-2xl overflow-hidden mb-6 bg-[#FFF3EE]" style="height:220px;">
+        <img src="/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>" alt="<?php echo htmlspecialchars($package['name'] ?? 'Package'); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
     </div>
 
     <!-- Package Info -->
@@ -74,7 +74,9 @@ include __DIR__ . '/layouts/header.php';
         ?>
         <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
             <div class="flex items-center space-x-3">
-                <img src="/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='/images/placeholder.svg'">
+                    <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
+                    <img src="/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                </div>
                 <div>
                     <h3 class="font-semibold text-gray-800"><?php echo $item['name']; ?></h3>
                     <p class="text-xs text-gray-500"><?php echo $item['description']; ?></p>

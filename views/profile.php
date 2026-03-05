@@ -1,4 +1,10 @@
 <?php
+// Auth guard — redirect unauthenticated users to the auth gate
+if (empty($_SESSION['user_id'])) {
+    header('Location: /auth_gate.php?redirect=' . urlencode('/profile.php'));
+    exit;
+}
+
 // Profile Page
 $pageTitle = "My Profile - Lola's Kusina";
 $currentPage = "account";

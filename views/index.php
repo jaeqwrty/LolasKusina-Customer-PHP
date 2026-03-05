@@ -89,8 +89,10 @@ include __DIR__ . '/layouts/header.php';
         ?>
         <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col">
             <!-- Package Image -->
-            <div class="relative">
-                <img src="/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.src='/images/placeholder.svg'">
+            <div class="relative overflow-hidden bg-[#FFF3EE]">
+                <a href="/package_details.php?id=<?php echo $package['id']; ?>" class="block">
+                    <img src="/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+                </a>
                 <?php if (isset($package['badge'])): ?>
                 <span class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                     <?php echo $package['badge']; ?>
@@ -126,7 +128,7 @@ include __DIR__ . '/layouts/header.php';
                         <span class="text-xs text-gray-500">(<?php echo $package['reviews']; ?>)</span>
                     </div>
 
-                    <a href="/order_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
+                    <a href="/package_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
                         Order Now
                     </a>
                 </div>
