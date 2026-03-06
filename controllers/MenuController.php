@@ -1,17 +1,20 @@
 <?php
-// Menu Controller
+/**
+ * Menu Controller — Handles menu browsing and custom package building
+ * 
+ * DIP: MenuItem model is injected via constructor, not created internally.
+ */
 require_once __DIR__ . '/../models/MenuItem.php';
 
 class MenuController {
     private $menuItemModel;
     
-    public function __construct() {
-        $this->menuItemModel = new MenuItem();
+    public function __construct(MenuItem $menuItemModel) {
+        $this->menuItemModel = $menuItemModel;
     }
     
-    // Display build package page
+    /** Display the build-your-own-package page. */
     public function buildPackage() {
-        // Get menu items by category for custom package building
         $mainDishes = $this->menuItemModel->getItemsByCategory('main_dish');
         $sideDishes = $this->menuItemModel->getItemsByCategory('side_dish');
         $desserts = $this->menuItemModel->getItemsByCategory('dessert');
@@ -19,7 +22,7 @@ class MenuController {
         include __DIR__ . '/../views/build_package.php';
     }
     
-    // Get items by category (for AJAX requests)
+    /** Return items by category as JSON (for AJAX requests). */
     public function getItemsByCategory() {
         if (!isset($_GET['category'])) {
             echo json_encode(['error' => 'Category not specified']);
@@ -33,7 +36,7 @@ class MenuController {
         echo json_encode($items);
     }
     
-    // Calculate custom package price
+    /** Calculate custom package price from selected items (AJAX). */
     public function calculatePrice() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['error' => 'Invalid request method']);

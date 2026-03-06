@@ -1,8 +1,13 @@
 <?php
-// Simple Router / Index File
+/**
+ * Router — OCP: Registry-based route mapping
+ * 
+ * Routes are defined in a data structure, not a switch statement.
+ * To add a new page, add an entry to $routes — no need to edit routing logic.
+ */
 session_start();
 
-// Base path for URL generation (supports subdirectory deployments, e.g. /LolasKusina)
+// Base path for URL generation (supports subdirectory deployments)
 define('BASE_PATH', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 
 // Get the requested URI
@@ -25,71 +30,40 @@ if (in_array(strtolower($fileExtension), $staticExtensions)) {
     }
 }
 
-// Route handling
-switch ($request) {
-    case '':
-    case 'index.php':
-        include __DIR__ . '/../views/index.php';
-        break;
-        
-    case 'order_details.php':
-    case 'views/order_details.php':
-        include __DIR__ . '/../views/order_details.php';
-        break;
+// ===== OCP Route Registry =====
+// Add new pages here — no need to touch routing logic below.
+$routes = [
+    ''                            => '/../views/index.php',
+    'index.php'                   => '/../views/index.php',
+    'order_details.php'           => '/../views/order_details.php',
+    'views/order_details.php'     => '/../views/order_details.php',
+    'package_details.php'         => '/../views/package_details.php',
+    'views/package_details.php'   => '/../views/package_details.php',
+    'build_package.php'           => '/../views/build_package.php',
+    'views/build_package.php'     => '/../views/build_package.php',
+    'cart.php'                    => '/../views/cart.php',
+    'views/cart.php'              => '/../views/cart.php',
+    'order_confirmation.php'      => '/../views/order_confirmation.php',
+    'views/order_confirmation.php'=> '/../views/order_confirmation.php',
+    'reviews.php'                 => '/../views/reviews.php',
+    'views/reviews.php'           => '/../views/reviews.php',
+    'write_review.php'            => '/../views/write_review.php',
+    'views/write_review.php'      => '/../views/write_review.php',
+    'review_success.php'          => '/../views/review_success.php',
+    'views/review_success.php'    => '/../views/review_success.php',
+    'order_history.php'           => '/../views/order_history.php',
+    'views/order_history.php'     => '/../views/order_history.php',
+    'profile.php'                 => '/../views/profile.php',
+    'views/profile.php'           => '/../views/profile.php',
+    'auth_gate.php'               => '/../views/auth_gate.php',
+    'views/auth_gate.php'         => '/../views/auth_gate.php',
+];
 
-    case 'package_details.php':
-    case 'views/package_details.php':
-        include __DIR__ . '/../views/package_details.php';
-        break;
-        
-    case 'build_package.php':
-    case 'views/build_package.php':
-        include __DIR__ . '/../views/build_package.php';
-        break;
-        
-    case 'cart.php':
-    case 'views/cart.php':
-        include __DIR__ . '/../views/cart.php';
-        break;
-        
-    case 'order_confirmation.php':
-    case 'views/order_confirmation.php':
-        include __DIR__ . '/../views/order_confirmation.php';
-        break;
-    
-    case 'reviews.php':
-    case 'views/reviews.php':
-        include __DIR__ . '/../views/reviews.php';
-        break;
-        
-    case 'write_review.php':
-    case 'views/write_review.php':
-        include __DIR__ . '/../views/write_review.php';
-        break;
-        
-    case 'review_success.php':
-    case 'views/review_success.php':
-        include __DIR__ . '/../views/review_success.php';
-        break;
-        
-    case 'order_history.php':
-    case 'views/order_history.php':
-        include __DIR__ . '/../views/order_history.php';
-        break;
-        
-    case 'profile.php':
-    case 'views/profile.php':
-        include __DIR__ . '/../views/profile.php';
-        break;
-
-    case 'auth_gate.php':
-    case 'views/auth_gate.php':
-        include __DIR__ . '/../views/auth_gate.php';
-        break;
-    
-    default:
-        header("HTTP/1.0 404 Not Found");
-        echo "<h1>404 - Page Not Found</h1>";
-        break;
+// ===== Route Resolution =====
+if (array_key_exists($request, $routes)) {
+    include __DIR__ . $routes[$request];
+} else {
+    header("HTTP/1.0 404 Not Found");
+    echo "<h1>404 - Page Not Found</h1>";
 }
 ?>

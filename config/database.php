@@ -1,11 +1,15 @@
 <?php
-// Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'lolas_kusina');
+/**
+ * Database — Concrete implementation of DatabaseInterface
+ * 
+ * SRP: This file only holds the Database class.
+ * Config constants live in app.php.
+ * DIP: Implements DatabaseInterface so consumers depend on the abstraction.
+ */
+require_once __DIR__ . '/app.php';
+require_once __DIR__ . '/DatabaseInterface.php';
 
-class Database {
+class Database implements DatabaseInterface {
     private $conn;
     
     public function __construct() {

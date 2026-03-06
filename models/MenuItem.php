@@ -1,15 +1,20 @@
 <?php
-// Menu Item Model
-require_once __DIR__ . '/../config/database.php';
+/**
+ * MenuItem Model — Data access for menu_items table
+ * 
+ * DIP: Depends on DatabaseInterface, not the concrete Database class.
+ * Dependency is injected via constructor.
+ */
+require_once __DIR__ . '/../config/DatabaseInterface.php';
 
 class MenuItem {
     private $db;
     
-    public function __construct() {
-        $this->db = new Database();
+    public function __construct(DatabaseInterface $db) {
+        $this->db = $db;
     }
     
-    // Get all menu items
+    /** Get all menu items ordered by category and name. */
     public function getAllItems() {
         $sql = "SELECT * FROM menu_items ORDER BY category, name";
         $result = $this->db->query($sql);
@@ -24,7 +29,7 @@ class MenuItem {
         return $items;
     }
     
-    // Get items by category
+    /** Get items filtered by category. */
     public function getItemsByCategory($category) {
         $stmt = $this->db->prepare("SELECT * FROM menu_items WHERE category = ? ORDER BY name");
         $stmt->bind_param("s", $category);
@@ -41,7 +46,7 @@ class MenuItem {
         return $items;
     }
     
-    // Get item by ID
+    /** Get a single item by its ID. */
     public function getItemById($id) {
         $stmt = $this->db->prepare("SELECT * FROM menu_items WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -51,7 +56,7 @@ class MenuItem {
         return $result->fetch_assoc();
     }
     
-    // Get items by multiple IDs
+    /** Get multiple items by an array of IDs. */
     public function getItemsByIds($ids) {
         if (empty($ids)) {
             return [];

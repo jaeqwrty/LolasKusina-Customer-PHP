@@ -1,15 +1,20 @@
 <?php
-// Package Model
-require_once __DIR__ . '/../config/database.php';
+/**
+ * Package Model — Data access for packages and package_items tables
+ * 
+ * DIP: Depends on DatabaseInterface, not the concrete Database class.
+ * Dependency is injected via constructor.
+ */
+require_once __DIR__ . '/../config/DatabaseInterface.php';
 
 class Package {
     private $db;
     
-    public function __construct() {
-        $this->db = new Database();
+    public function __construct(DatabaseInterface $db) {
+        $this->db = $db;
     }
     
-    // Get all packages
+    /** Get all packages ordered by newest first. */
     public function getAllPackages() {
         $sql = "SELECT * FROM packages ORDER BY created_at DESC";
         $result = $this->db->query($sql);
@@ -24,7 +29,7 @@ class Package {
         return $packages;
     }
     
-    // Get package by ID
+    /** Get a single package by its ID. */
     public function getPackageById($id) {
         $stmt = $this->db->prepare("SELECT * FROM packages WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -34,7 +39,7 @@ class Package {
         return $result->fetch_assoc();
     }
     
-    // Get package items
+    /** Get all items belonging to a package. */
     public function getPackageItems($packageId) {
         $stmt = $this->db->prepare("SELECT * FROM package_items WHERE package_id = ?");
         $stmt->bind_param("i", $packageId);
@@ -51,7 +56,7 @@ class Package {
         return $items;
     }
     
-    // Get packages by category
+    /** Get packages filtered by category. */
     public function getPackagesByCategory($category) {
         $stmt = $this->db->prepare("SELECT * FROM packages WHERE category = ? ORDER BY created_at DESC");
         $stmt->bind_param("s", $category);
@@ -68,7 +73,7 @@ class Package {
         return $packages;
     }
     
-    // Get best sellers
+    /** Get best-selling packages. */
     public function getBestSellers($limit = 3) {
         $sql = "SELECT * FROM packages WHERE is_bestseller = 1 ORDER BY sales_count DESC LIMIT ?";
         $stmt = $this->db->prepare($sql);
