@@ -116,7 +116,7 @@
     <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-100 fixed top-0 left-0 h-full z-50 shadow-lg">
         <!-- Logo -->
         <div class="p-6 border-b border-gray-100">
-            <a href="<?php echo BASE_PATH ?: '/'; ?>" class="flex items-center space-x-3">
+            <a href="<?php echo BASE_PATH; ?>/index.php" class="flex items-center space-x-3">
                 <img src="<?php echo BASE_PATH; ?>/images/logo.png" alt="Logo" class="h-12 w-12 rounded-full" onerror="this.style.display='none'">
                 <div>
                     <span class="text-lg font-bold text-primary block leading-tight">Lola's Kusina</span>
@@ -127,7 +127,7 @@
 
         <!-- Navigation Links -->
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="<?php echo BASE_PATH ?: '/'; ?>" class="sidebar-link <?php echo ($currentPage ?? '') === 'packages' ? 'active' : ''; ?> flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-orange-50 hover:text-primary transition font-medium">
+            <a href="<?php echo BASE_PATH; ?>/index.php" class="sidebar-link <?php echo ($currentPage ?? '') === 'packages' ? 'active' : ''; ?> flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-orange-50 hover:text-primary transition font-medium">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
                 <span>Packages</span>
             </a>
@@ -168,7 +168,7 @@
         <header class="md:hidden bg-white shadow-md sticky top-0 z-40 safe-top">
             <div class="container mx-auto px-4 py-3">
                 <div class="flex justify-between items-center">
-                    <a href="<?php echo BASE_PATH ?: '/'; ?>" class="flex items-center space-x-2 touch-feedback">
+                    <a href="<?php echo BASE_PATH; ?>/index.php" class="flex items-center space-x-2 touch-feedback">
                         <img src="<?php echo BASE_PATH; ?>/images/logo.png" alt="Lola's Kusina Logo" class="h-10 w-10 rounded-full" onerror="this.style.display='none'">
                         <span class="text-xl font-bold text-primary">Lola's Kusina</span>
                     </a>

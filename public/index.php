@@ -18,6 +18,7 @@ $request = trim($request, '/');
 
 // Remove query string
 $request = strtok($request, '?');
+if ($request === false) $request = '';
 
 // Serve static files directly (CSS, JS, images, JSON, etc.)
 $staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot', 'json', 'webp'];

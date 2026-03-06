@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start PHP Dev Server",
+      "type": "shell",
+      "command": "php -S localhost:8000 index.php 2>&1",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "cmd.exe",
+          "args": ["/d", "/c"]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "php-server",
+        "pattern": {
+          "regexp": "^\\[.+\\]\\s+(.+)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Development Server",
+          "endsPattern": "started$"
+        }
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": false
+      }
+    }
+  ]
+}

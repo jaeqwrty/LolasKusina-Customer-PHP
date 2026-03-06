@@ -1,9 +1,7 @@
 <?php
 // Auth guard — redirect unauthenticated users to the auth gate
-if (empty($_SESSION['user_id'])) {
-    header('Location: ' . BASE_PATH . '/auth_gate.php?redirect=' . urlencode(BASE_PATH . '/profile.php'));
-    exit;
-}
+require_once __DIR__ . '/../config/auth.php';
+requireAuth('/profile.php');
 
 // Profile Page
 $pageTitle = "My Profile - Lola's Kusina";

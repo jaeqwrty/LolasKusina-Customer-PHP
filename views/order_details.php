@@ -8,11 +8,11 @@ include __DIR__ . '/layouts/header.php';
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-3xl mb-20 md:mb-8">
     <!-- Back Button and Actions -->
     <div class="flex justify-between items-center mb-4">
-        <a href="/" class="bg-white rounded-full p-2 shadow-md">
+        <button onclick="goBack()" class="bg-white rounded-full p-2 shadow-md">
             <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
-        </a>
+        </button>
         <div class="flex space-x-2">
             <button class="bg-white rounded-full p-2 shadow-md">
                 <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,6 +116,15 @@ include __DIR__ . '/layouts/header.php';
 </div>
 
 <script>
+// ── Navigation ────────────────────────────────────────
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = BASE_PATH || '/';
+    }
+}
+
 let quantity = 1;
 const basePrice = 2500;
 

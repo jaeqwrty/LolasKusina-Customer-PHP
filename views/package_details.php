@@ -1,6 +1,6 @@
 <?php
 // Package Details View
-session_start();
+// Note: session_start() is already called in public/index.php
 
 // Load package data from DB or fall back to static sample
 $package = null;
@@ -9,9 +9,11 @@ $items = [];
 $packageId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($packageId > 0) {
+    require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/../models/Package.php';
     try {
-        $packageModel = new Package();
+        $db = new Database();
+        $packageModel = new Package($db);
         $package = $packageModel->getPackageById($packageId);
         if ($package) {
             $items = $packageModel->getPackageItems($packageId);
@@ -115,11 +117,11 @@ include __DIR__ . '/layouts/header.php';
     <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
 
     <!-- Back button -->
-    <a href="/" class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md touch-feedback">
+    <button onclick="goBack()" class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md touch-feedback">
         <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-    </a>
+    </button>
 
     <!-- Action buttons: favourite + share -->
     <div class="absolute top-4 right-4 flex space-x-2">
@@ -298,7 +300,7 @@ include __DIR__ . '/layouts/header.php';
 </div><!-- /container -->
 
 <!-- ── Sticky Add-to-Cart bar ────────────────────────────── -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 safe-bottom z-50 md:relative md:border-0 md:bg-transparent md:px-8 md:pb-8">
+<div class="fixed bottom-20 md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 safe-bottom z-40 md:z-50 md:relative md:border-0 md:bg-transparent md:px-8 md:pb-8">
     <div class="max-w-md md:max-w-2xl mx-auto flex items-center gap-3">
         <!-- Price summary -->
         <div class="flex flex-col leading-tight">
@@ -330,6 +332,15 @@ const PACKAGE_NAME = <?php echo json_encode($package['name'] ?? ''); ?>;
 const PACKAGE_IMG  = <?php echo json_encode($package['image'] ?? 'placeholder.svg'); ?>;
 
 let qty = 1;
+
+// ── Navigation ────────────────────────────────────────
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = BASE_PATH || '/';
+    }
+}
 
 function fmt(n) {
     return '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
