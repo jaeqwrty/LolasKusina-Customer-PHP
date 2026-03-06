@@ -222,20 +222,21 @@ include __DIR__ . '/layouts/header.php';
 
         <!-- Distance & Fee (delivery only) -->
         <div id="deliveryFeeSection" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <div class="flex justify-between items-center mb-2">
+            <div class="mb-3">
+                <label class="text-sm text-gray-600 font-medium mb-1 block">Distance (km)</label>
                 <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                    <span class="text-sm text-gray-600">Distance</span>
+                    <input id="distanceInput" type="number" placeholder="Enter distance" min="0" step="0.1" value="0" class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" oninput="calculateDeliveryFee()">
+                    <span class="text-sm text-gray-600 font-medium whitespace-nowrap">km</span>
                 </div>
-                <span id="distanceDisplay" class="font-bold text-gray-800">8.5 km</span>
             </div>
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>
                     <span class="text-sm text-gray-600">Delivery Fee</span>
                 </div>
-                <span class="font-bold text-primary text-lg">₱<span id="deliveryFeeAmount">102.00</span></span>
+                <span class="font-bold text-primary text-lg">₱<span id="deliveryFeeAmount">0.00</span></span>
             </div>
+            <p class="text-xs text-gray-400 mt-2">₱12 per kilometer</p>
         </div>
 
         <!-- Schedule Delivery -->
@@ -369,15 +370,15 @@ include __DIR__ . '/layouts/header.php';
             </div>
             <div id="step3FeeRow" class="flex justify-between items-center mb-2">
                 <span class="text-sm text-gray-600">Delivery Fee</span>
-                <span id="step3FeeAmount" class="font-semibold text-gray-800">₱<?php echo number_format(102, 2); ?></span>
+                <span id="step3FeeAmount" class="font-semibold text-gray-800">₱0.00</span>
             </div>
             <div class="border-t border-gray-100 pt-2 mt-1 flex justify-between items-center mb-2">
                 <span class="text-sm font-bold text-gray-700">Total Bill</span>
-                <span id="step3TotalBill" class="font-bold text-gray-800 text-lg">₱<?php echo number_format($subtotal + 102, 2); ?></span>
+                <span id="step3TotalBill" class="font-bold text-gray-800 text-lg">₱<?php echo number_format($subtotal, 2); ?></span>
             </div>
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Downpayment Required (50%)</span>
-                <span id="step3Downpayment" class="font-bold text-primary">₱<?php echo number_format(($subtotal + 102) * 0.5, 2); ?></span>
+                <span id="step3Downpayment" class="font-bold text-primary">₱<?php echo number_format($subtotal * 0.5, 2); ?></span>
             </div>
             <div class="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-start gap-2">
                 <svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
@@ -505,12 +506,12 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <div id="reviewFeeRow" class="flex justify-between">
                     <span class="text-gray-600">Delivery Fee</span>
-                    <span id="reviewDeliveryFee" class="font-semibold text-gray-800">₱102.00</span>
+                    <span id="reviewDeliveryFee" class="font-semibold text-gray-800">₱0.00</span>
                 </div>
                 <div class="border-t border-gray-200 pt-2 mt-2"></div>
                 <div class="flex justify-between text-lg">
                     <span class="font-bold text-gray-800">Total Amount</span>
-                    <span id="reviewTotal" class="font-bold text-primary">₱<?php echo number_format($subtotal + 102, 2); ?></span>
+                    <span id="reviewTotal" class="font-bold text-primary">₱<?php echo number_format($subtotal, 2); ?></span>
                 </div>
             </div>
 
@@ -518,7 +519,7 @@ include __DIR__ . '/layouts/header.php';
             <div class="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold text-gray-700">50% Downpayment</span>
-                    <span id="reviewDownpayment" class="font-bold text-primary">₱<?php echo number_format(($subtotal + 102) * 0.5, 2); ?></span>
+                    <span id="reviewDownpayment" class="font-bold text-primary">₱<?php echo number_format($subtotal * 0.5, 2); ?></span>
                 </div>
             </div>
         </div>
@@ -536,8 +537,29 @@ include __DIR__ . '/layouts/header.php';
 // ===== State =====
 let currentStep = 0; // Start at cart view (step 0)
 let orderMethod = 'delivery'; // 'delivery' or 'pickup'
-let deliveryFee = 102;
+let deliveryFee = 0;
 const subtotal = <?php echo $subtotal; ?>;
+const DELIVERY_RATE = 12; // 12 pesos per kilometer
+
+// Calculate delivery fee based on distance
+function calculateDeliveryFee() {
+    const distanceInput = document.getElementById('distanceInput');
+    const distance = parseFloat(distanceInput.value) || 0;
+    
+    if (distance < 0) {
+        distanceInput.value = 0;
+        return;
+    }
+    
+    deliveryFee = distance * DELIVERY_RATE;
+    
+    // Update display
+    document.getElementById('deliveryFeeAmount').textContent = deliveryFee.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+    
+    // Update step 3 and 4 if they're visible
+    if (currentStep === 3) populateStep3();
+    if (currentStep === 4) populateReview();
+}
 
 // Map step number to the correct div ID based on current method
 function getStepId(step) {
@@ -594,6 +616,12 @@ function validateStep(step) {
             document.getElementById('deliveryAddress').focus();
             return false;
         }
+        const distance = parseFloat(document.getElementById('distanceInput').value) || 0;
+        if (distance <= 0) {
+            showToast('Please enter a valid distance');
+            document.getElementById('distanceInput').focus();
+            return false;
+        }
     }
     if (step === 3) {
         const name = document.getElementById('contactName').value.trim();
@@ -607,7 +635,12 @@ function validateStep(step) {
 // ===== Step 1: Method Selection =====
 function selectMethod(method) {
     orderMethod = method;
-    deliveryFee = method === 'pickup' ? 0 : 102;
+    if (method === 'pickup') {
+        deliveryFee = 0;
+    } else {
+        // Reset distance input for delivery
+        calculateDeliveryFee();
+    }
 
     document.querySelectorAll('.option-card').forEach(card => {
         card.classList.toggle('selected', card.dataset.method === method);
