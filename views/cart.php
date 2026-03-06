@@ -1,7 +1,7 @@
 <?php
 // Cart / Multi-Step Checkout View
 $pageTitle = "My Cart";
-$currentPage = "cart";
+$currentPage = "order";
 $cartCount = count($_SESSION['cart'] ?? []);
 
 // Sample cart items (replace with session data)

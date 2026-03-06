@@ -142,10 +142,6 @@
                     <span class="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold"><?php echo $cartCount; ?></span>
                 <?php endif; ?>
             </a>
-            <a href="<?php echo BASE_PATH; ?>/order_history.php" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-orange-50 hover:text-primary transition font-medium">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
-                <span>Order History</span>
-            </a>
             <a href="<?php echo BASE_PATH; ?>/profile.php" class="sidebar-link <?php echo ($currentPage ?? '') === 'account' ? 'active' : ''; ?> flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-orange-50 hover:text-primary transition font-medium">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                 <span>Account</span>
@@ -190,8 +186,5 @@
                         <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold"><?php echo $cartCount; ?></span>
                     <?php endif; ?>
                 </a>
-                <button class="bg-primary text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-600 transition shadow-md">
-                    Login
-                </button>
             </div>
         </header>

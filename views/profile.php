@@ -7,6 +7,34 @@ requireAuth('/profile.php');
 $pageTitle = "My Profile - Lola's Kusina";
 $currentPage = "account";
 include __DIR__ . '/layouts/header.php';
+
+// Order data for display
+$orders = [
+    [
+        'ref'     => 'PH-88210',
+        'date'    => 'Oct 24, 2023 • 12:30 PM',
+        'name'    => 'Lechon Package B (Good for 20)',
+        'price'   => 8500,
+        'status'  => 'Delivered',
+        'id'      => 1,
+    ],
+    [
+        'ref'     => 'PH-88195',
+        'date'    => 'Sep 12, 2023 • 10:00 AM',
+        'name'    => 'Paborito Package (Good for 6-7)',
+        'price'   => 2500,
+        'status'  => 'Delivered',
+        'id'      => 2,
+    ],
+    [
+        'ref'     => 'PH-88310',
+        'date'    => 'Mar 5, 2026 • 2:00 PM',
+        'name'    => 'Family Fiesta (Good for 10-12)',
+        'price'   => 4200,
+        'status'  => 'Ongoing',
+        'id'      => 3,
+    ],
+];
 ?>
 
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">
@@ -36,9 +64,10 @@ include __DIR__ . '/layouts/header.php';
         UPDATE INFO
     </button>
 
-    <!-- My Orders Shortcut -->
+    <!-- Orders Section -->
     <div class="bg-white rounded-2xl shadow-md mb-4 overflow-hidden">
-        <a href="<?php echo BASE_PATH; ?>/order_history.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
+        <!-- My Orders Toggle Button -->
+        <button onclick="toggleOrdersSection()" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
@@ -48,10 +77,79 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <span class="font-semibold text-gray-800">My Orders</span>
             </div>
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg id="ordersToggleIcon" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-        </a>
+        </button>
+
+        <!-- Orders List (Hidden by default) -->
+        <div id="ordersSection" class="hidden border-t border-gray-100 px-4 py-4">
+            <!-- Filter Tabs -->
+            <div class="flex space-x-2 mb-4 overflow-x-auto pb-1 hide-scrollbar">
+                <button onclick="filterOrders('all')" class="order-filter-btn active bg-primary text-white px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" data-filter="all">All</button>
+                <button onclick="filterOrders('ongoing')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="ongoing">Ongoing</button>
+                <button onclick="filterOrders('delivered')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="delivered">Completed</button>
+                <button onclick="filterOrders('cancelled')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="cancelled">Cancelled</button>
+            </div>
+
+            <!-- Orders List -->
+            <div id="ordersList" class="space-y-3">
+                <?php foreach ($orders as $order): ?>
+                <?php
+                    $statusColor = match($order['status']) {
+                        'Delivered'  => 'bg-green-100 text-green-700',
+                        'Ongoing'    => 'bg-blue-100 text-blue-700',
+                        'Cancelled'  => 'bg-red-100 text-red-700',
+                        default      => 'bg-gray-100 text-gray-700',
+                    };
+                    $statusFilter = strtolower($order['status']);
+                ?>
+                <div class="order-card bg-gray-50 rounded-xl p-3 border border-gray-100" data-status="<?php echo $statusFilter; ?>">
+                    <!-- Order Header -->
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <span class="text-xs text-gray-400 font-medium">REF #<?php echo $order['ref']; ?></span>
+                            <div class="text-xs font-semibold text-gray-700 mt-0.5"><?php echo $order['date']; ?></div>
+                        </div>
+                        <span class="<?php echo $statusColor; ?> text-xs font-bold px-2.5 py-0.5 rounded-full">
+                            <?php echo $order['status']; ?>
+                        </span>
+                    </div>
+
+                    <!-- Package Name -->
+                    <p class="text-xs text-gray-600 font-medium mb-2"><?php echo htmlspecialchars($order['name']); ?></p>
+
+                    <!-- Price -->
+                    <div class="mb-3">
+                        <span class="text-xs text-gray-500">Total Price</span>
+                        <div class="text-sm font-bold text-primary">₱<?php echo number_format($order['price'], 2); ?></div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex space-x-2">
+                        <a href="<?php echo BASE_PATH; ?>/order_details.php?id=<?php echo $order['id']; ?>"
+                           class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg font-semibold text-xs text-center hover:border-primary hover:text-primary transition touch-feedback">
+                            Details
+                        </a>
+                        <?php if ($order['status'] === 'Delivered'): ?>
+                        <a href="<?php echo BASE_PATH; ?>/write_review.php?package=<?php echo $order['id']; ?>"
+                           class="flex-1 bg-primary text-white py-2 rounded-lg font-semibold text-xs text-center hover:bg-orange-600 transition touch-feedback">
+                            Review
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Empty state (hidden by default) -->
+            <div id="emptyState" class="hidden text-center py-8">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-gray-500 font-medium text-sm">Walang orders dito</p>
+            </div>
+        </div>
 
         <div class="border-t border-gray-100"></div>
 
@@ -126,6 +224,36 @@ include __DIR__ . '/layouts/header.php';
 </div>
 
 <script>
+function toggleOrdersSection() {
+    const ordersSection = document.getElementById('ordersSection');
+    const toggleIcon = document.getElementById('ordersToggleIcon');
+    
+    ordersSection.classList.toggle('hidden');
+    toggleIcon.style.transform = ordersSection.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+function filterOrders(filter) {
+    document.querySelectorAll('.order-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-white');
+        btn.classList.add('bg-white', 'text-gray-700');
+    });
+    const activeBtn = document.querySelector(`[data-filter="${filter}"]`);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'text-gray-700');
+        activeBtn.classList.add('bg-primary', 'text-white');
+    }
+
+    let visibleCount = 0;
+    document.querySelectorAll('.order-card').forEach(card => {
+        const status = card.dataset.status;
+        const show = filter === 'all' || status === filter;
+        card.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+    });
+
+    document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
+}
+
 function saveProfile() {
     document.getElementById('editModal').classList.add('hidden');
     const toast = document.createElement('div');
