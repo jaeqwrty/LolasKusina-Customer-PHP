@@ -51,5 +51,6 @@
             });
         }
     </script>
+    <script src="<?php echo BASE_PATH; ?>/js/localStorageManager.js"></script>
 </body>
 </html>
