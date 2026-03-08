@@ -36,6 +36,12 @@ if (in_array(strtolower($fileExtension), $staticExtensions)) {
 $routes = [
     ''                            => '/../views/index.php',
     'index.php'                   => '/../views/index.php',
+    'login.php'                   => '/../views/login.php',
+    'views/login.php'             => '/../views/login.php',
+    'register.php'                => '/../views/register.php',
+    'views/register.php'          => '/../views/register.php',
+    'forgot_password.php'         => '/../views/forgot_password.php',
+    'views/forgot_password.php'   => '/../views/forgot_password.php',
     'order_details.php'           => '/../views/order_details.php',
     'views/order_details.php'     => '/../views/order_details.php',
     'package_details.php'         => '/../views/package_details.php',
