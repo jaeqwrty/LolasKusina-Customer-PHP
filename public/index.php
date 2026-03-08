@@ -62,6 +62,8 @@ $routes = [
     'views/order_history.php'     => '/../views/order_history.php',
     'profile.php'                 => '/../views/profile.php',
     'views/profile.php'           => '/../views/profile.php',
+    'logout.php'                  => '/../views/logout.php',
+    'views/logout.php'            => '/../views/logout.php',
     'auth_gate.php'               => '/../views/auth_gate.php',
     'views/auth_gate.php'         => '/../views/auth_gate.php',
 ];
