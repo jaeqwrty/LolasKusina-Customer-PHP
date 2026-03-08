@@ -1,11 +1,26 @@
 <?php
 // Auth Gate Page — shown when an unauthenticated user tries to access a protected page
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Ensure BASE_PATH is available even if accessed without going through the router
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
+}
+
+// If already logged in, go straight to the app
+if (!empty($_SESSION['user_id'])) {
+    header('Location: ' . BASE_PATH . '/index.php');
+    exit;
+}
+
 $pageTitle = "Welcome - Lola's Kusina";
-$redirect = $_GET['redirect'] ?? '/';
+$redirect = $_GET['redirect'] ?? BASE_PATH . '/index.php';
 
 // Validate redirect to only allow relative paths (prevent open redirect)
 if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
-    $redirect = '/';
+    $redirect = BASE_PATH . '/index.php';
 }
 ?>
 <!DOCTYPE html>

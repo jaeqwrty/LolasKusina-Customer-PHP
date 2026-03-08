@@ -21,6 +21,7 @@ if (ini_get("session.use_cookies")) {
 
 session_destroy();
 
-$basePath = defined('BASE_PATH') ? BASE_PATH : '';
+$basePath = defined('BASE_PATH') ? BASE_PATH : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+if ($basePath === '.') $basePath = '';
 header('Location: ' . $basePath . '/index.php');
 exit;
