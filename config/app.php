@@ -9,6 +9,7 @@
 // Database credentials
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'lolas_kusina');
+define('DB_PASS', 'jay123');
+define('DB_NAME', 'lolas_kusina_db');
+define('DB_PORT', 3307);
 ?>

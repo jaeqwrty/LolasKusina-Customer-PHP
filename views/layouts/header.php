@@ -148,11 +148,27 @@
             </a>
         </nav>
 
-        <!-- Login at bottom -->
+        <!-- Login / User at bottom -->
         <div class="p-4 border-t border-gray-100">
-            <button class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 active:bg-orange-700 transition shadow-md">
-                Login
-            </button>
+            <?php if (!empty($_SESSION['user_id'])): ?>
+                <div class="flex items-center space-x-3 mb-3 px-1">
+                    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        <?php echo strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)); ?>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-semibold text-gray-800 truncate"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></p>
+                        <p class="text-xs text-gray-400 truncate"><?php echo htmlspecialchars($_SESSION['user_email'] ?? ''); ?></p>
+                    </div>
+                </div>
+                <a href="<?php echo BASE_PATH; ?>/logout.php" class="w-full flex items-center justify-center space-x-2 border border-gray-200 text-gray-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 hover:text-red-500 hover:border-red-200 active:bg-red-100 transition text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Logout</span>
+                </a>
+            <?php else: ?>
+                <a href="<?php echo BASE_PATH; ?>/auth_gate.php" class="w-full flex items-center justify-center bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 active:bg-orange-700 transition shadow-md">
+                    Login
+                </a>
+            <?php endif; ?>
         </div>
     </aside>
     <!-- ============================================================================ -->
@@ -168,9 +184,18 @@
                         <img src="<?php echo BASE_PATH; ?>/images/logo.png" alt="Lola's Kusina Logo" class="h-10 w-10 rounded-full" onerror="this.style.display='none'">
                         <span class="text-xl font-bold text-primary">Lola's Kusina</span>
                     </a>
-                    <button class="bg-primary text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-600 active:bg-orange-700 transition touch-feedback">
-                        Login
-                    </button>
+                    <?php if (!empty($_SESSION['user_id'])): ?>
+                        <a href="<?php echo BASE_PATH; ?>/profile.php" class="flex items-center space-x-2 touch-feedback">
+                            <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+                                <?php echo strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)); ?>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-700 hidden sm:block"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?php echo BASE_PATH; ?>/auth_gate.php" class="bg-primary text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-600 active:bg-orange-700 transition touch-feedback">
+                            Login
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </header>
