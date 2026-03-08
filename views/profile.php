@@ -1,13 +1,94 @@
 <?php
 // Auth guard — redirect unauthenticated users to the auth gate
-if (empty($_SESSION['user_id'])) {
-    header('Location: ' . BASE_PATH . '/auth_gate.php?redirect=' . urlencode(BASE_PATH . '/profile.php'));
-    exit;
-}
+require_once __DIR__ . '/../config/auth.php';
+requireAuth('/profile.php');
 
-// Profile Page
+require_once __DIR__ . '/../config/database.php';
+
 $pageTitle = "My Profile - Lola's Kusina";
 $currentPage = "account";
+
+$db     = Database::getInstance();
+$userId = (int)$_SESSION['user_id'];
+
+// Fetch authenticated user from DB
+$userResult = $db->execute(
+    "SELECT user_id, first_name, last_name, email, phone_number FROM users WHERE user_id = ? AND is_active = 1",
+    [$userId]
+);
+if (empty($userResult)) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: ' . BASE_PATH . '/auth_gate.php');
+    exit;
+}
+$userData      = $userResult[0];
+$fullName      = trim($userData['first_name'] . ' ' . $userData['last_name']);
+$phone         = $userData['phone_number'];
+$email         = $userData['email'] ?? '';
+$avatarInitial = strtoupper(substr($userData['first_name'], 0, 1));
+
+// Handle profile update — POST/Redirect/GET to prevent re-submission
+$updateError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_profile') {
+    $newName  = trim($_POST['full_name'] ?? '');
+    $newPhone = trim($_POST['phone']     ?? '');
+    $newEmail = trim($_POST['email']     ?? '');
+
+    if (empty($newName) || empty($newPhone)) {
+        $updateError = 'Full name and phone number are required.';
+    } else {
+        $phoneCheck = $db->execute(
+            "SELECT user_id FROM users WHERE phone_number = ? AND user_id != ?",
+            [$newPhone, $userId]
+        );
+        if (!empty($phoneCheck)) {
+            $updateError = 'That phone number is already used by another account.';
+        } else {
+            $nameParts = explode(' ', $newName, 2);
+            $db->execute(
+                "UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, email = ?, updated_at = NOW() WHERE user_id = ?",
+                [$nameParts[0], $nameParts[1] ?? '', $newPhone, $newEmail ?: null, $userId]
+            );
+            $_SESSION['user_name'] = $newName;
+            header('Location: ' . BASE_PATH . '/profile.php?updated=1');
+            exit;
+        }
+    }
+    // Keep submitted values visible in the re-opened modal on error
+    $fullName      = $newName;
+    $phone         = $newPhone;
+    $email         = $newEmail;
+    $avatarInitial = strtoupper(substr(trim(explode(' ', $newName)[0] ?? 'U'), 0, 1));
+}
+
+// Fetch user's real orders (matches lolas_kusina_db schema)
+$ordersResult = $db->execute(
+    "SELECT o.order_id, o.reference_number, o.created_at, o.status,
+            op.grand_total,
+            (SELECT mi.name FROM order_items oi
+             JOIN menu_items mi ON mi.item_id = oi.item_id
+             WHERE oi.order_id = o.order_id
+             ORDER BY oi.order_item_id ASC LIMIT 1) AS first_item
+     FROM orders o
+     LEFT JOIN order_payments op ON op.order_id = o.order_id
+     WHERE o.customer_id = ?
+     ORDER BY o.created_at DESC",
+    [$userId]
+);
+$orders = array_map(fn($o) => [
+    'ref'    => $o['reference_number'] ?? ('PH-' . str_pad($o['order_id'], 5, '0', STR_PAD_LEFT)),
+    'date'   => date('M j, Y • g:i A', strtotime($o['created_at'])),
+    'name'   => $o['first_item'] ?? ('Order #' . $o['order_id']),
+    'price'  => (float)($o['grand_total'] ?? 0),
+    'status' => match($o['status']) {
+        'Completed' => 'Delivered',
+        'Cancelled', 'Rejected' => 'Cancelled',
+        default => 'Ongoing',
+    },
+    'id'     => $o['order_id'],
+], is_array($ordersResult) ? $ordersResult : []);
+
 include __DIR__ . '/layouts/header.php';
 ?>
 
@@ -20,7 +101,7 @@ include __DIR__ . '/layouts/header.php';
     <div class="flex flex-col items-center mb-6">
         <div class="relative mb-3">
             <div class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                JD
+                <?php echo $avatarInitial; ?>
             </div>
             <button class="absolute bottom-0 right-0 bg-dark text-white rounded-full p-1.5 shadow-md hover:bg-gray-700 transition touch-feedback">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,8 +109,8 @@ include __DIR__ . '/layouts/header.php';
                 </svg>
             </button>
         </div>
-        <h2 class="text-xl font-bold text-gray-800">Juan Dela Cruz</h2>
-        <p class="text-gray-500 text-sm">+63 917 123 4567</p>
+        <h2 class="text-xl font-bold text-gray-800"><?php echo htmlspecialchars($fullName); ?></h2>
+        <p class="text-gray-500 text-sm"><?php echo htmlspecialchars($phone); ?></p>
     </div>
 
     <!-- Update Info Button -->
@@ -38,9 +119,10 @@ include __DIR__ . '/layouts/header.php';
         UPDATE INFO
     </button>
 
-    <!-- My Orders Shortcut -->
+    <!-- Orders Section -->
     <div class="bg-white rounded-2xl shadow-md mb-4 overflow-hidden">
-        <a href="<?php echo BASE_PATH; ?>/order_history.php" class="flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
+        <!-- My Orders Toggle Button -->
+        <button onclick="toggleOrdersSection()" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 touch-feedback transition">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
@@ -50,10 +132,79 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <span class="font-semibold text-gray-800">My Orders</span>
             </div>
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg id="ordersToggleIcon" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-        </a>
+        </button>
+
+        <!-- Orders List (Hidden by default) -->
+        <div id="ordersSection" class="hidden border-t border-gray-100 px-4 py-4">
+            <!-- Filter Tabs -->
+            <div class="flex space-x-2 mb-4 overflow-x-auto pb-1 hide-scrollbar">
+                <button onclick="filterOrders('all')" class="order-filter-btn active bg-primary text-white px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" data-filter="all">All</button>
+                <button onclick="filterOrders('ongoing')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="ongoing">Ongoing</button>
+                <button onclick="filterOrders('delivered')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="delivered">Completed</button>
+                <button onclick="filterOrders('cancelled')" class="order-filter-btn bg-white text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="cancelled">Cancelled</button>
+            </div>
+
+            <!-- Orders List -->
+            <div id="ordersList" class="space-y-3">
+                <?php foreach ($orders as $order): ?>
+                <?php
+                    $statusColor = match($order['status']) {
+                        'Delivered'  => 'bg-green-100 text-green-700',
+                        'Ongoing'    => 'bg-blue-100 text-blue-700',
+                        'Cancelled'  => 'bg-red-100 text-red-700',
+                        default      => 'bg-gray-100 text-gray-700',
+                    };
+                    $statusFilter = strtolower($order['status']);
+                ?>
+                <div class="order-card bg-gray-50 rounded-xl p-3 border border-gray-100" data-status="<?php echo $statusFilter; ?>">
+                    <!-- Order Header -->
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <span class="text-xs text-gray-400 font-medium">REF #<?php echo $order['ref']; ?></span>
+                            <div class="text-xs font-semibold text-gray-700 mt-0.5"><?php echo $order['date']; ?></div>
+                        </div>
+                        <span class="<?php echo $statusColor; ?> text-xs font-bold px-2.5 py-0.5 rounded-full">
+                            <?php echo $order['status']; ?>
+                        </span>
+                    </div>
+
+                    <!-- Package Name -->
+                    <p class="text-xs text-gray-600 font-medium mb-2"><?php echo htmlspecialchars($order['name']); ?></p>
+
+                    <!-- Price -->
+                    <div class="mb-3">
+                        <span class="text-xs text-gray-500">Total Price</span>
+                        <div class="text-sm font-bold text-primary">₱<?php echo number_format($order['price'], 2); ?></div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex space-x-2">
+                        <a href="<?php echo BASE_PATH; ?>/order_details.php?id=<?php echo $order['id']; ?>"
+                           class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg font-semibold text-xs text-center hover:border-primary hover:text-primary transition touch-feedback">
+                            Details
+                        </a>
+                        <?php if ($order['status'] === 'Delivered'): ?>
+                        <a href="<?php echo BASE_PATH; ?>/write_review.php?package=<?php echo $order['id']; ?>"
+                           class="flex-1 bg-primary text-white py-2 rounded-lg font-semibold text-xs text-center hover:bg-orange-600 transition touch-feedback">
+                            Review
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Empty state (hidden by default) -->
+            <div id="emptyState" class="hidden text-center py-8">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-gray-500 font-medium text-sm">Walang orders dito</p>
+            </div>
+        </div>
 
         <div class="border-t border-gray-100"></div>
 
@@ -90,46 +241,80 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Logout -->
-    <button class="w-full bg-white border-2 border-red-200 text-red-500 py-4 rounded-xl font-bold text-base hover:bg-red-50 active:bg-red-100 transition touch-feedback">
+    <a href="<?php echo BASE_PATH; ?>/logout.php" class="block w-full bg-white border-2 border-red-200 text-red-500 py-4 rounded-xl font-bold text-base hover:bg-red-50 active:bg-red-100 transition touch-feedback text-center">
         Mag-logout
-    </button>
+    </a>
 
 </div>
 
 <!-- Edit Profile Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-end justify-center md:items-center">
-    <div class="bg-white w-full max-w-[480px] rounded-t-2xl md:rounded-2xl p-6 shadow-xl">
+<div id="editModal" class="<?php echo $updateError ? '' : 'hidden'; ?> fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-end justify-center md:items-center">
+    <form method="post" class="bg-white w-full max-w-[480px] rounded-t-2xl md:rounded-2xl p-6 shadow-xl">
+        <input type="hidden" name="action" value="update_profile">
         <h2 class="text-lg font-bold text-gray-800 mb-4">I-Update ang Info</h2>
+        <?php if ($updateError): ?>
+            <p class="text-red-500 text-sm mb-3 bg-red-50 px-3 py-2 rounded-lg"><?php echo htmlspecialchars($updateError); ?></p>
+        <?php endif; ?>
         <div class="space-y-3 mb-5">
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Full Name</label>
-                <input type="text" value="Juan Dela Cruz" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="text" name="full_name" value="<?php echo htmlspecialchars($fullName); ?>" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Phone Number</label>
-                <input type="tel" value="+63 917 123 4567" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="tel" name="phone" value="<?php echo htmlspecialchars($phone); ?>" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Email (optional)</label>
-                <input type="email" placeholder="juan@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" placeholder="juan@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
         </div>
         <div class="flex space-x-3">
-            <button onclick="document.getElementById('editModal').classList.add('hidden')"
+            <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')"
                 class="flex-1 border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition touch-feedback">
                 Kanselahin
             </button>
-            <button onclick="saveProfile()"
+            <button type="submit"
                 class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition touch-feedback shadow-md">
                 I-Save
             </button>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
-function saveProfile() {
-    document.getElementById('editModal').classList.add('hidden');
+function toggleOrdersSection() {
+    const ordersSection = document.getElementById('ordersSection');
+    const toggleIcon = document.getElementById('ordersToggleIcon');
+    
+    ordersSection.classList.toggle('hidden');
+    toggleIcon.style.transform = ordersSection.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+function filterOrders(filter) {
+    document.querySelectorAll('.order-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-white');
+        btn.classList.add('bg-white', 'text-gray-700');
+    });
+    const activeBtn = document.querySelector(`[data-filter="${filter}"]`);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'text-gray-700');
+        activeBtn.classList.add('bg-primary', 'text-white');
+    }
+
+    let visibleCount = 0;
+    document.querySelectorAll('.order-card').forEach(card => {
+        const status = card.dataset.status;
+        const show = filter === 'all' || status === filter;
+        card.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+    });
+
+    document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
+}
+
+// Show success toast after profile save (PRG redirect sets ?updated=1)
+if (new URLSearchParams(window.location.search).get('updated') === '1') {
     const toast = document.createElement('div');
     toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-sm font-medium';
     toast.textContent = '✓ Profile updated!';
@@ -139,6 +324,7 @@ function saveProfile() {
         toast.style.transition = 'opacity 0.3s';
         setTimeout(() => toast.remove(), 300);
     }, 2500);
+    history.replaceState(null, '', window.location.pathname);
 }
 
 // Close modal on backdrop tap

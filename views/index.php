@@ -1,6 +1,6 @@
 <?php
 // Home Page - Packages View
-$pageTitle = "Lola's Kusina - Home";
+$pageTitle = "Lola's Kusina";
 $currentPage = "packages";
 include __DIR__ . '/layouts/header.php';
 ?>

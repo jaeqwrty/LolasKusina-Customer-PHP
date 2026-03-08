@@ -2,7 +2,7 @@
     <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 safe-bottom z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-around items-center py-3">
-                <a href="<?php echo BASE_PATH ?: '/'; ?>" class="flex flex-col items-center <?php echo ($currentPage ?? '') == 'packages' ? 'text-primary' : 'text-gray-500'; ?> hover:text-primary transition touch-feedback min-w-[60px]">
+                <a href="<?php echo BASE_PATH; ?>/index.php" class="flex flex-col items-center <?php echo ($currentPage ?? '') == 'packages' ? 'text-primary' : 'text-gray-500'; ?> hover:text-primary transition touch-feedback min-w-[60px]">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                     </svg>
@@ -51,5 +51,6 @@
             });
         }
     </script>
+    <script src="<?php echo BASE_PATH; ?>/js/localStorageManager.js"></script>
 </body>
 </html>
