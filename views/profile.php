@@ -3,38 +3,93 @@
 require_once __DIR__ . '/../config/auth.php';
 requireAuth('/profile.php');
 
-// Profile Page
+require_once __DIR__ . '/../config/database.php';
+
 $pageTitle = "My Profile - Lola's Kusina";
 $currentPage = "account";
-include __DIR__ . '/layouts/header.php';
 
-// Order data for display
-$orders = [
-    [
-        'ref'     => 'PH-88210',
-        'date'    => 'Oct 24, 2023 • 12:30 PM',
-        'name'    => 'Lechon Package B (Good for 20)',
-        'price'   => 8500,
-        'status'  => 'Delivered',
-        'id'      => 1,
-    ],
-    [
-        'ref'     => 'PH-88195',
-        'date'    => 'Sep 12, 2023 • 10:00 AM',
-        'name'    => 'Paborito Package (Good for 6-7)',
-        'price'   => 2500,
-        'status'  => 'Delivered',
-        'id'      => 2,
-    ],
-    [
-        'ref'     => 'PH-88310',
-        'date'    => 'Mar 5, 2026 • 2:00 PM',
-        'name'    => 'Family Fiesta (Good for 10-12)',
-        'price'   => 4200,
-        'status'  => 'Ongoing',
-        'id'      => 3,
-    ],
-];
+$db     = Database::getInstance();
+$userId = (int)$_SESSION['user_id'];
+
+// Fetch authenticated user from DB
+$userResult = $db->execute(
+    "SELECT user_id, first_name, last_name, email, phone_number FROM users WHERE user_id = ? AND is_active = 1",
+    [$userId]
+);
+if (empty($userResult)) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: ' . BASE_PATH . '/auth_gate.php');
+    exit;
+}
+$userData      = $userResult[0];
+$fullName      = trim($userData['first_name'] . ' ' . $userData['last_name']);
+$phone         = $userData['phone_number'];
+$email         = $userData['email'] ?? '';
+$avatarInitial = strtoupper(substr($userData['first_name'], 0, 1));
+
+// Handle profile update — POST/Redirect/GET to prevent re-submission
+$updateError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_profile') {
+    $newName  = trim($_POST['full_name'] ?? '');
+    $newPhone = trim($_POST['phone']     ?? '');
+    $newEmail = trim($_POST['email']     ?? '');
+
+    if (empty($newName) || empty($newPhone)) {
+        $updateError = 'Full name and phone number are required.';
+    } else {
+        $phoneCheck = $db->execute(
+            "SELECT user_id FROM users WHERE phone_number = ? AND user_id != ?",
+            [$newPhone, $userId]
+        );
+        if (!empty($phoneCheck)) {
+            $updateError = 'That phone number is already used by another account.';
+        } else {
+            $nameParts = explode(' ', $newName, 2);
+            $db->execute(
+                "UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, email = ?, updated_at = NOW() WHERE user_id = ?",
+                [$nameParts[0], $nameParts[1] ?? '', $newPhone, $newEmail ?: null, $userId]
+            );
+            $_SESSION['user_name'] = $newName;
+            header('Location: ' . BASE_PATH . '/profile.php?updated=1');
+            exit;
+        }
+    }
+    // Keep submitted values visible in the re-opened modal on error
+    $fullName      = $newName;
+    $phone         = $newPhone;
+    $email         = $newEmail;
+    $avatarInitial = strtoupper(substr(trim(explode(' ', $newName)[0] ?? 'U'), 0, 1));
+}
+
+// Fetch user's real orders (matches lolas_kusina_db schema)
+$ordersResult = $db->execute(
+    "SELECT o.order_id, o.reference_number, o.created_at, o.status,
+            op.grand_total,
+            (SELECT mi.name FROM order_items oi
+             JOIN menu_items mi ON mi.item_id = oi.item_id
+             WHERE oi.order_id = o.order_id
+             ORDER BY oi.order_item_id ASC LIMIT 1) AS first_item
+     FROM orders o
+     LEFT JOIN order_payments op ON op.order_id = o.order_id
+     WHERE o.customer_id = ?
+     ORDER BY o.created_at DESC",
+    [$userId]
+);
+$orders = array_map(fn($o) => [
+    'ref'    => $o['reference_number'] ?? ('PH-' . str_pad($o['order_id'], 5, '0', STR_PAD_LEFT)),
+    'date'   => date('M j, Y • g:i A', strtotime($o['created_at'])),
+    'name'   => $o['first_item'] ?? ('Order #' . $o['order_id']),
+    'price'  => (float)($o['grand_total'] ?? 0),
+    'status' => match($o['status']) {
+        'Completed' => 'Delivered',
+        'Cancelled', 'Rejected' => 'Cancelled',
+        default => 'Ongoing',
+    },
+    'id'     => $o['order_id'],
+], is_array($ordersResult) ? $ordersResult : []);
+
+include __DIR__ . '/layouts/header.php';
 ?>
 
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">
@@ -46,7 +101,7 @@ $orders = [
     <div class="flex flex-col items-center mb-6">
         <div class="relative mb-3">
             <div class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                JD
+                <?php echo $avatarInitial; ?>
             </div>
             <button class="absolute bottom-0 right-0 bg-dark text-white rounded-full p-1.5 shadow-md hover:bg-gray-700 transition touch-feedback">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,8 +109,8 @@ $orders = [
                 </svg>
             </button>
         </div>
-        <h2 class="text-xl font-bold text-gray-800">Juan Dela Cruz</h2>
-        <p class="text-gray-500 text-sm">+63 917 123 4567</p>
+        <h2 class="text-xl font-bold text-gray-800"><?php echo htmlspecialchars($fullName); ?></h2>
+        <p class="text-gray-500 text-sm"><?php echo htmlspecialchars($phone); ?></p>
     </div>
 
     <!-- Update Info Button -->
@@ -186,41 +241,45 @@ $orders = [
     </div>
 
     <!-- Logout -->
-    <button class="w-full bg-white border-2 border-red-200 text-red-500 py-4 rounded-xl font-bold text-base hover:bg-red-50 active:bg-red-100 transition touch-feedback">
+    <a href="<?php echo BASE_PATH; ?>/logout.php" class="block w-full bg-white border-2 border-red-200 text-red-500 py-4 rounded-xl font-bold text-base hover:bg-red-50 active:bg-red-100 transition touch-feedback text-center">
         Mag-logout
-    </button>
+    </a>
 
 </div>
 
 <!-- Edit Profile Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-end justify-center md:items-center">
-    <div class="bg-white w-full max-w-[480px] rounded-t-2xl md:rounded-2xl p-6 shadow-xl">
+<div id="editModal" class="<?php echo $updateError ? '' : 'hidden'; ?> fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-end justify-center md:items-center">
+    <form method="post" class="bg-white w-full max-w-[480px] rounded-t-2xl md:rounded-2xl p-6 shadow-xl">
+        <input type="hidden" name="action" value="update_profile">
         <h2 class="text-lg font-bold text-gray-800 mb-4">I-Update ang Info</h2>
+        <?php if ($updateError): ?>
+            <p class="text-red-500 text-sm mb-3 bg-red-50 px-3 py-2 rounded-lg"><?php echo htmlspecialchars($updateError); ?></p>
+        <?php endif; ?>
         <div class="space-y-3 mb-5">
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Full Name</label>
-                <input type="text" value="Juan Dela Cruz" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="text" name="full_name" value="<?php echo htmlspecialchars($fullName); ?>" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Phone Number</label>
-                <input type="tel" value="+63 917 123 4567" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="tel" name="phone" value="<?php echo htmlspecialchars($phone); ?>" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
             <div>
                 <label class="text-sm text-gray-600 mb-1 block">Email (optional)</label>
-                <input type="email" placeholder="juan@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" placeholder="juan@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm">
             </div>
         </div>
         <div class="flex space-x-3">
-            <button onclick="document.getElementById('editModal').classList.add('hidden')"
+            <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')"
                 class="flex-1 border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition touch-feedback">
                 Kanselahin
             </button>
-            <button onclick="saveProfile()"
+            <button type="submit"
                 class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition touch-feedback shadow-md">
                 I-Save
             </button>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
@@ -254,8 +313,8 @@ function filterOrders(filter) {
     document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
 }
 
-function saveProfile() {
-    document.getElementById('editModal').classList.add('hidden');
+// Show success toast after profile save (PRG redirect sets ?updated=1)
+if (new URLSearchParams(window.location.search).get('updated') === '1') {
     const toast = document.createElement('div');
     toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-sm font-medium';
     toast.textContent = '✓ Profile updated!';
@@ -265,6 +324,7 @@ function saveProfile() {
         toast.style.transition = 'opacity 0.3s';
         setTimeout(() => toast.remove(), 300);
     }, 2500);
+    history.replaceState(null, '', window.location.pathname);
 }
 
 // Close modal on backdrop tap
