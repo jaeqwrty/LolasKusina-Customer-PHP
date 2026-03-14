@@ -1,10 +1,7 @@
 <?php
 // Auth guard — redirect unauthenticated users to the auth gate
-if (empty($_SESSION['user_id'])) {
-    $qs = isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : '';
-    header('Location: ' . BASE_PATH . '/auth_gate.php?redirect=' . urlencode(BASE_PATH . '/write_review.php' . $qs));
-    exit;
-}
+require_once __DIR__ . '/../config/auth.php';
+requireAuth('/write_review.php', true); // Preserve query string for package ID
 
 // Write a Review Page
 $pageTitle = "Mag-Review - Lola's Kusina";

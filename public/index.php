@@ -24,6 +24,7 @@ $request = trim($request, '/');
 
 // Remove query string
 $request = strtok($request, '?');
+if ($request === false) $request = '';
 
 // Serve static files directly (CSS, JS, images, JSON, etc.)
 $staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot', 'json', 'webp'];
@@ -74,8 +75,14 @@ $routes = [
         $controller = new PackageController(new Package(getDb()));
         $controller->index();
     },
-
-    // Package details
+    'login.php'                   => '/../views/login.php',
+    'views/login.php'             => '/../views/login.php',
+    'register.php'                => '/../views/register.php',
+    'views/register.php'          => '/../views/register.php',
+    'forgot_password.php'         => '/../views/forgot_password.php',
+    'views/forgot_password.php'   => '/../views/forgot_password.php',
+    'order_details.php'           => '/../views/order_details.php',
+    'views/order_details.php'     => '/../views/order_details.php',
     'package_details.php'         => '/../views/package_details.php',
     'views/package_details.php'   => '/../views/package_details.php',
 
@@ -110,6 +117,8 @@ $routes = [
     // Profile & Auth
     'profile.php'                 => '/../views/profile.php',
     'views/profile.php'           => '/../views/profile.php',
+    'logout.php'                  => '/../views/logout.php',
+    'views/logout.php'            => '/../views/logout.php',
     'auth_gate.php'               => '/../views/auth_gate.php',
     'views/auth_gate.php'         => '/../views/auth_gate.php',
 
