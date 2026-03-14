@@ -4,13 +4,16 @@
  * 
  * This script will help you set up the database and get started quickly.
  * Run this file once to initialize the database.
+ * Reads credentials from .env file (falls back to defaults).
  */
 
-// Database configuration
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'lolas_kusina';
+// Load config from .env
+require_once __DIR__ . '/config/app.php';
+
+$host   = DB_HOST;
+$user   = DB_USER;
+$pass   = DB_PASS;
+$dbname = DB_NAME;
 
 echo "=== Lola's Kusina Setup Script ===\n\n";
 
@@ -20,21 +23,24 @@ try {
     $conn = new mysqli($host, $user, $pass);
     
     if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error . "\n");
+        throw new RuntimeException("Connection failed: " . $conn->connect_error);
     }
     echo "   ✓ Connected successfully\n\n";
     
     // Create database
     echo "2. Creating database...\n";
-    $sql = "CREATE DATABASE IF NOT EXISTS $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+    $sql = "CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
     if ($conn->query($sql) === TRUE) {
         echo "   ✓ Database '$dbname' created or already exists\n\n";
     } else {
-        die("   ✗ Error creating database: " . $conn->error . "\n");
+        throw new RuntimeException("Error creating database: " . $conn->error);
     }
     
     // Select database
     $conn->select_db($dbname);
+    
+    // Set timezone (NFR-T03)
+    $conn->query("SET time_zone = '+08:00'");
     
     // Read and execute schema.sql
     echo "3. Creating tables and inserting sample data...\n";
@@ -68,15 +74,15 @@ try {
     
     echo "=== Setup Complete! ===\n\n";
     echo "Next steps:\n";
-    echo "1. Update database credentials in config/database.php if needed\n";
+    echo "1. Update .env with your database credentials if needed\n";
     echo "2. Add your food images to public/images/ folder\n";
     echo "3. Start the development server:\n";
-    echo "   cd public\n";
-    echo "   php -S localhost:8000\n";
+    echo "   php -S localhost:8000 index.php\n";
     echo "4. Open your browser and visit: http://localhost:8000\n\n";
     echo "Enjoy Lola's Kusina! 🍽️\n";
     
 } catch (Exception $e) {
-    die("Error: " . $e->getMessage() . "\n");
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
 }
 ?>

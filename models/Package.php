@@ -14,81 +14,97 @@ class Package {
         $this->db = $db;
     }
     
-    /** Get all packages ordered by newest first. */
+    /** Get all active packages ordered by newest first. */
     public function getAllPackages() {
-        $sql = "SELECT * FROM packages ORDER BY created_at DESC";
-        $result = $this->db->query($sql);
-        
-        $packages = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $packages[] = $row;
-            }
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM packages WHERE is_active = 1 ORDER BY created_at DESC"
+            );
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (RuntimeException $e) {
+            error_log("Package::getAllPackages failed: " . $e->getMessage());
+            return [];
         }
-        
-        return $packages;
+    }
+    
+    /** Get active featured/bestseller packages for the homepage (FR-C01). */
+    public function getFeaturedPackages($limit = 6) {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM packages WHERE is_active = 1 AND is_bestseller = 1 
+                 ORDER BY sales_count DESC LIMIT ?"
+            );
+            $stmt->bind_param("i", $limit);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (RuntimeException $e) {
+            error_log("Package::getFeaturedPackages failed: " . $e->getMessage());
+            return [];
+        }
     }
     
     /** Get a single package by its ID. */
     public function getPackageById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM packages WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM packages WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_assoc();
+        } catch (RuntimeException $e) {
+            error_log("Package::getPackageById failed: " . $e->getMessage());
+            return null;
+        }
     }
     
     /** Get all items belonging to a package. */
     public function getPackageItems($packageId) {
-        $stmt = $this->db->prepare("SELECT * FROM package_items WHERE package_id = ?");
-        $stmt->bind_param("i", $packageId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $items = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $items[] = $row;
-            }
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM package_items WHERE package_id = ?");
+            $stmt->bind_param("i", $packageId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (RuntimeException $e) {
+            error_log("Package::getPackageItems failed: " . $e->getMessage());
+            return [];
         }
-        
-        return $items;
     }
     
-    /** Get packages filtered by category. */
+    /** Get active packages filtered by category. */
     public function getPackagesByCategory($category) {
-        $stmt = $this->db->prepare("SELECT * FROM packages WHERE category = ? ORDER BY created_at DESC");
-        $stmt->bind_param("s", $category);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $packages = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $packages[] = $row;
-            }
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM packages WHERE category = ? AND is_active = 1 ORDER BY created_at DESC"
+            );
+            $stmt->bind_param("s", $category);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (RuntimeException $e) {
+            error_log("Package::getPackagesByCategory failed: " . $e->getMessage());
+            return [];
         }
-        
-        return $packages;
     }
     
     /** Get best-selling packages. */
     public function getBestSellers($limit = 3) {
-        $sql = "SELECT * FROM packages WHERE is_bestseller = 1 ORDER BY sales_count DESC LIMIT ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $limit);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $packages = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $packages[] = $row;
-            }
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM packages WHERE is_bestseller = 1 AND is_active = 1 
+                 ORDER BY sales_count DESC LIMIT ?"
+            );
+            $stmt->bind_param("i", $limit);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (RuntimeException $e) {
+            error_log("Package::getBestSellers failed: " . $e->getMessage());
+            return [];
         }
-        
-        return $packages;
     }
 }
 ?>

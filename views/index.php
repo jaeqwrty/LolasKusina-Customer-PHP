@@ -1,8 +1,46 @@
 <?php
 // Home Page - Packages View
+// $packages is provided by PackageController::index() — loaded from database.
+// Falls back to sample data if controller didn't provide packages (e.g. DB error).
 $pageTitle = "Lola's Kusina - Home";
 $currentPage = "packages";
 include __DIR__ . '/layouts/header.php';
+
+// Fallback: if packages were not loaded from the database, use sample data
+if (!isset($packages) || empty($packages)) {
+    $packages = [
+        [
+            'id' => 1,
+            'name' => 'Paborito Package',
+            'description' => 'Good for 6-7 pax',
+            'price' => 2500,
+            'image' => 'paborito-package.jpg',
+            'rating' => 4.8,
+            'reviews_count' => 20,
+            'is_bestseller' => true,
+        ],
+        [
+            'id' => 2,
+            'name' => 'Family Fiesta',
+            'description' => 'Good for 10-12 pax',
+            'price' => 4200,
+            'image' => 'family-fiesta.jpg',
+            'rating' => 4.9,
+            'reviews_count' => 35,
+            'is_bestseller' => true,
+        ],
+        [
+            'id' => 3,
+            'name' => 'Salo-Salo Special',
+            'description' => 'Good for 15-20 pax',
+            'price' => 6500,
+            'image' => 'salo-salo.jpg',
+            'rating' => 4.7,
+            'reviews_count' => 18,
+            'is_bestseller' => false,
+        ],
+    ];
+}
 ?>
 
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-none mb-20 md:mb-8">
@@ -47,55 +85,27 @@ include __DIR__ . '/layouts/header.php';
         </div>
 
         <!-- Package grid: 1 col mobile, 3 cols desktop -->
-        <div class="md:grid md:grid-cols-3 md:gap-6">
-        <?php
-        $packages = [
-            [
-                'id' => 1,
-                'name' => 'Paborito Package',
-                'description' => 'Good for 6-7 pax',
-                'details' => 'Includes Lechon Kawali, Pata, Pancit Canton, Steamed Rice, and Buko Pandan.',
-                'price' => 2500,
-                'image' => 'paborito-package.jpg',
-                'rating' => 4.8,
-                'reviews' => 20,
-                'badge' => 'Best Seller'
-            ],
-            [
-                'id' => 2,
-                'name' => 'Family Fiesta',
-                'description' => 'Good for 10-12 pax',
-                'details' => 'The ultimate gathering set! Chicken Inasal, Kare-Kare, Lumpia Shanghai, Garlic Rice, and Halo-halo.',
-                'price' => 4200,
-                'image' => 'family-fiesta.jpg',
-                'rating' => 4.9,
-                'reviews' => 35,
-                'badge' => 'Popular'
-            ],
-            [
-                'id' => 3,
-                'name' => 'Salo-Salo Special',
-                'description' => 'Good for 15-20 pax',
-                'details' => 'Perfect for big celebrations! Crispy Pata, Beef Caldereta, Seafood Pancit, Java Rice, Fruit Salad.',
-                'price' => 6500,
-                'image' => 'salo-salo.jpg',
-                'rating' => 4.7,
-                'reviews' => 18,
-                'badge' => 'New'
-            ]
-        ];
-
-        foreach ($packages as $package):
+        <div class="md:grid md:grid-cols-3 md:gap-6" id="packageGrid">
+        <?php foreach ($packages as $package): 
+            // Normalize field names for both DB and fallback data
+            $packageName = $package['name'] ?? 'Unnamed Package';
+            $packageDesc = $package['description'] ?? $package['persons_served'] ?? '';
+            $packagePrice = $package['price'] ?? $package['base_price'] ?? 0;
+            $packageImage = $package['image'] ?? '';
+            $packageRating = $package['rating'] ?? 0;
+            $packageReviews = $package['reviews_count'] ?? $package['reviews'] ?? 0;
+            $isBestseller = !empty($package['is_bestseller']);
+            $packageCategory = $package['category'] ?? 'all_packages';
         ?>
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col">
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col package-card" data-category="<?php echo htmlspecialchars($packageCategory); ?>">
             <!-- Package Image -->
             <div class="relative overflow-hidden bg-[#FFF3EE]">
                 <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="block">
-                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($packageImage); ?>" alt="<?php echo htmlspecialchars($packageName); ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </a>
-                <?php if (isset($package['badge'])): ?>
+                <?php if ($isBestseller): ?>
                 <span class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    <?php echo $package['badge']; ?>
+                    Best Seller
                 </span>
                 <?php endif; ?>
                 <button class="absolute top-3 left-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
@@ -109,23 +119,21 @@ include __DIR__ . '/layouts/header.php';
             <div class="p-4 flex flex-col flex-1">
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h4 class="text-lg font-bold text-gray-800"><?php echo $package['name']; ?></h4>
-                        <p class="text-sm text-gray-500"><?php echo $package['description']; ?></p>
+                        <h4 class="text-lg font-bold text-gray-800"><?php echo htmlspecialchars($packageName); ?></h4>
+                        <p class="text-sm text-gray-500"><?php echo htmlspecialchars($packageDesc); ?></p>
                     </div>
                     <div class="text-right">
-                        <span class="text-xl font-bold text-primary">₱<?php echo number_format($package['price'], 2); ?></span>
+                        <span class="text-xl font-bold text-primary">₱<?php echo number_format($packagePrice, 2); ?></span>
                     </div>
                 </div>
-
-                <p class="text-sm text-gray-600 mb-3 flex-1"><?php echo $package['details']; ?></p>
 
                 <div class="flex items-center justify-between mt-auto">
                     <div class="flex items-center space-x-1">
                         <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                         </svg>
-                        <span class="text-sm font-semibold text-gray-700"><?php echo $package['rating']; ?></span>
-                        <span class="text-xs text-gray-500">(<?php echo $package['reviews']; ?>)</span>
+                        <span class="text-sm font-semibold text-gray-700"><?php echo $packageRating; ?></span>
+                        <span class="text-xs text-gray-500">(<?php echo $packageReviews; ?>)</span>
                     </div>
 
                     <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
@@ -148,7 +156,7 @@ include __DIR__ . '/layouts/header.php';
 </div>
 
 <script>
-// Category filtering functionality
+// Category filtering functionality — client-side filter using data-category attributes
 function filterPackages(category) {
     // Update button styles
     const buttons = document.querySelectorAll('.category-btn');
@@ -162,9 +170,16 @@ function filterPackages(category) {
         }
     });
     
-    // In a real implementation, this would filter the packages
-    // For now, we'll just show a message
-    console.log('Filtering packages by:', category);
+    // Filter package cards by data-category
+    const cards = document.querySelectorAll('.package-card');
+    cards.forEach(card => {
+        if (category === 'all') {
+            card.style.display = '';
+        } else {
+            const cardCategory = card.dataset.category || '';
+            card.style.display = cardCategory.includes(category) ? '' : 'none';
+        }
+    });
 }
 
 // Smooth scroll to top when navigating
