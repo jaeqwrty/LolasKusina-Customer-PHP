@@ -33,9 +33,34 @@ if (in_array(strtolower($fileExtension), $staticExtensions)) {
 
 // ===== OCP Route Registry =====
 // Add new pages here — no need to touch routing logic below.
+$homeRouteHandler = function () {
+    require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../models/Package.php';
+    require_once __DIR__ . '/../controllers/PackageController.php';
+
+    $controller = new PackageController(new Package(Database::getInstance()));
+    $controller->index();
+};
+
+$deliveryFeeHandler = function () {
+    require_once __DIR__ . '/../controllers/DeliveryFeeController.php';
+
+    $controller = new DeliveryFeeController(new GoogleMatrixService());
+    $controller->calculate();
+};
+
+$reverseGeocodeHandler = function () {
+    require_once __DIR__ . '/../controllers/DeliveryFeeController.php';
+
+    $controller = new DeliveryFeeController(new GoogleMatrixService());
+    $controller->reverseGeocode();
+};
+
 $routes = [
-    ''                            => '/../views/index.php',
-    'index.php'                   => '/../views/index.php',
+    ''                            => $homeRouteHandler,
+    'index.php'                   => $homeRouteHandler,
+    'api/delivery-fee'            => $deliveryFeeHandler,
+    'api/reverse-geocode'         => $reverseGeocodeHandler,
     'login.php'                   => '/../views/login.php',
     'views/login.php'             => '/../views/login.php',
     'register.php'                => '/../views/register.php',
@@ -70,7 +95,12 @@ $routes = [
 
 // ===== Route Resolution =====
 if (array_key_exists($request, $routes)) {
-    include __DIR__ . $routes[$request];
+    $target = $routes[$request];
+    if (is_callable($target)) {
+        $target();
+    } else {
+        include __DIR__ . $target;
+    }
 } else {
     header("HTTP/1.0 404 Not Found");
     echo "<h1>404 - Page Not Found</h1>";

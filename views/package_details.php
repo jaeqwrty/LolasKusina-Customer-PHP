@@ -1,6 +1,6 @@
 <?php
 // Package Details View
-// Note: session_start() is already called in public/index.php
+// Note: session_start() is already called in public/app_router.php
 
 // Load package data from DB or fall back to static sample
 $package = null;
@@ -23,7 +23,7 @@ if ($packageId > 0) {
     }
 }
 
-// Static fallback packages (mirrors what index.php shows)
+// Static fallback packages (mirrors what home.php shows)
 $staticPackages = [
     1 => [
         'id'          => 1,

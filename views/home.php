@@ -2,6 +2,7 @@
 // Home Page - Packages View
 $pageTitle = "Lola's Kusina";
 $currentPage = "packages";
+$packages = (isset($packages) && is_array($packages)) ? $packages : [];
 include __DIR__ . '/layouts/header.php';
 ?>
 
@@ -48,54 +49,34 @@ include __DIR__ . '/layouts/header.php';
 
         <!-- Package grid: 1 col mobile, 3 cols desktop -->
         <div class="md:grid md:grid-cols-3 md:gap-6">
+        <?php if (empty($packages)): ?>
+        <div class="md:col-span-3 bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500">
+            No packages available right now. Please check again later.
+        </div>
+        <?php else: ?>
+        <?php foreach ($packages as $package): ?>
         <?php
-        $packages = [
-            [
-                'id' => 1,
-                'name' => 'Paborito Package',
-                'description' => 'Good for 6-7 pax',
-                'details' => 'Includes Lechon Kawali, Pata, Pancit Canton, Steamed Rice, and Buko Pandan.',
-                'price' => 2500,
-                'image' => 'paborito-package.jpg',
-                'rating' => 4.8,
-                'reviews' => 20,
-                'badge' => 'Best Seller'
-            ],
-            [
-                'id' => 2,
-                'name' => 'Family Fiesta',
-                'description' => 'Good for 10-12 pax',
-                'details' => 'The ultimate gathering set! Chicken Inasal, Kare-Kare, Lumpia Shanghai, Garlic Rice, and Halo-halo.',
-                'price' => 4200,
-                'image' => 'family-fiesta.jpg',
-                'rating' => 4.9,
-                'reviews' => 35,
-                'badge' => 'Popular'
-            ],
-            [
-                'id' => 3,
-                'name' => 'Salo-Salo Special',
-                'description' => 'Good for 15-20 pax',
-                'details' => 'Perfect for big celebrations! Crispy Pata, Beef Caldereta, Seafood Pancit, Java Rice, Fruit Salad.',
-                'price' => 6500,
-                'image' => 'salo-salo.jpg',
-                'rating' => 4.7,
-                'reviews' => 18,
-                'badge' => 'New'
-            ]
-        ];
-
-        foreach ($packages as $package):
+            $packageId = (int) ($package['id'] ?? 0);
+            $packageName = htmlspecialchars($package['name'] ?? 'Package', ENT_QUOTES, 'UTF-8');
+            $subtitle = htmlspecialchars($package['persons_served'] ?? ($package['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $details = htmlspecialchars($package['details'] ?? ($package['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $priceValue = isset($package['price']) ? (float) $package['price'] : 0;
+            $imageName = htmlspecialchars($package['image'] ?? 'placeholder.svg', ENT_QUOTES, 'UTF-8');
+            $rating = number_format((float) ($package['rating'] ?? 0), 1);
+            $reviews = (int) ($package['reviews_count'] ?? ($package['reviews'] ?? 0));
+            $badge = !empty($package['badge'])
+                ? htmlspecialchars($package['badge'], ENT_QUOTES, 'UTF-8')
+                : (!empty($package['is_bestseller']) ? 'Best Seller' : '');
         ?>
         <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-4 hover:shadow-xl transition flex flex-col">
             <!-- Package Image -->
             <div class="relative overflow-hidden bg-[#FFF3EE]">
-                <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="block">
-                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $package['image']; ?>" alt="<?php echo $package['name']; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
+                <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $packageId; ?>" class="block">
+                    <img src="<?php echo BASE_PATH; ?>/images/<?php echo $imageName; ?>" alt="<?php echo $packageName; ?>" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </a>
-                <?php if (isset($package['badge'])): ?>
+                <?php if ($badge !== ''): ?>
                 <span class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    <?php echo $package['badge']; ?>
+                    <?php echo $badge; ?>
                 </span>
                 <?php endif; ?>
                 <button class="absolute top-3 left-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
@@ -109,32 +90,33 @@ include __DIR__ . '/layouts/header.php';
             <div class="p-4 flex flex-col flex-1">
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h4 class="text-lg font-bold text-gray-800"><?php echo $package['name']; ?></h4>
-                        <p class="text-sm text-gray-500"><?php echo $package['description']; ?></p>
+                        <h4 class="text-lg font-bold text-gray-800"><?php echo $packageName; ?></h4>
+                        <p class="text-sm text-gray-500"><?php echo $subtitle; ?></p>
                     </div>
                     <div class="text-right">
-                        <span class="text-xl font-bold text-primary">₱<?php echo number_format($package['price'], 2); ?></span>
+                        <span class="text-xl font-bold text-primary">₱<?php echo number_format($priceValue, 2); ?></span>
                     </div>
                 </div>
 
-                <p class="text-sm text-gray-600 mb-3 flex-1"><?php echo $package['details']; ?></p>
+                <p class="text-sm text-gray-600 mb-3 flex-1"><?php echo $details; ?></p>
 
                 <div class="flex items-center justify-between mt-auto">
                     <div class="flex items-center space-x-1">
                         <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                         </svg>
-                        <span class="text-sm font-semibold text-gray-700"><?php echo $package['rating']; ?></span>
-                        <span class="text-xs text-gray-500">(<?php echo $package['reviews']; ?>)</span>
+                        <span class="text-sm font-semibold text-gray-700"><?php echo $rating; ?></span>
+                        <span class="text-xs text-gray-500">(<?php echo $reviews; ?>)</span>
                     </div>
 
-                    <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $package['id']; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
+                    <a href="<?php echo BASE_PATH; ?>/package_details.php?id=<?php echo $packageId; ?>" class="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-orange-600 transition shadow-md">
                         Order Now
                     </a>
                 </div>
             </div>
         </div>
         <?php endforeach; ?>
+        <?php endif; ?>
         </div><!-- End package grid -->
     </div>
 

@@ -1,0 +1,16 @@
+# Environment and secret files
+.env
+.env.*
+!.env.example
+
+# Local API key/config files (do not commit)
+config/*.local.php
+config/google_matrix.local.php
+
+# Keep examples/templates in git
+!config/*.example.php
+
+# Common OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/settings.json

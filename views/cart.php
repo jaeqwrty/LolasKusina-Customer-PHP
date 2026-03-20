@@ -1,8 +1,20 @@
 <?php
 // Cart / Multi-Step Checkout View
+require_once __DIR__ . '/../config/google_matrix.php';
+
 $pageTitle = "My Cart";
 $currentPage = "order";
 $cartCount = count($_SESSION['cart'] ?? []);
+$matrixConfig = getGoogleMatrixConfig();
+$storeAddress = (string) ($matrixConfig['store_address'] ?? '');
+$storeMapUrl = (string) ($matrixConfig['store_map_url'] ?? 'https://www.google.com/maps');
+
+$storeLat = 7.4471598;
+$storeLng = 125.823198;
+if (preg_match('/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/', $storeAddress, $coordMatches)) {
+    $storeLat = (float) $coordMatches[1];
+    $storeLng = (float) $coordMatches[2];
+}
 
 // Sample cart items (replace with session data)
 $cartItems = [
@@ -31,6 +43,8 @@ foreach ($cartItems as $item) {
 
 include __DIR__ . '/layouts/header.php';
 ?>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
 <style>
     /* Step progress bar */
@@ -67,6 +81,15 @@ include __DIR__ . '/layouts/header.php';
     .schedule-option { cursor: pointer; transition: all 0.2s; }
     .schedule-option.selected { background: #FF6B35; color: white; }
     .schedule-option.selected .schedule-sub { color: rgba(255,255,255,0.8); }
+
+    /* Interactive maps */
+    .checkout-map {
+        height: 220px;
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
 </style>
 
 <div class="container mx-auto px-4 md:px-8 py-4 max-w-md md:max-w-2xl mb-20 md:mb-8">
@@ -209,15 +232,12 @@ include __DIR__ . '/layouts/header.php';
                 <input id="deliveryAddress" type="text" placeholder="123 Rizal Ave, Manila" value="" class="flex-1 text-sm text-gray-800 font-medium bg-transparent border-b border-gray-200 pb-1 focus:outline-none focus:border-primary">
             </div>
             
-            <!-- Map placeholder -->
-            <div class="w-full h-40 bg-gray-100 rounded-xl mb-3 flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50"></div>
-                <div class="relative text-center">
-                    <svg class="w-8 h-8 text-primary mx-auto mb-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                    <p class="text-xs text-gray-500">Map Preview</p>
-                </div>
+            <!-- Interactive delivery map -->
+            <div id="deliveryMap" class="checkout-map mb-3"></div>
+            <div class="text-xs text-gray-500 mb-2">
+                Tap the map to pin the exact delivery location.
             </div>
-            <button class="text-primary text-sm font-semibold hover:underline">Edit Map</button>
+            <a href="<?php echo htmlspecialchars($storeMapUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-primary text-sm font-semibold hover:underline inline-block">Open in Google Maps</a>
         </div>
 
         <!-- Distance & Fee (delivery only) -->
@@ -225,9 +245,10 @@ include __DIR__ . '/layouts/header.php';
             <div class="mb-3">
                 <label class="text-sm text-gray-600 font-medium mb-1 block">Distance (km)</label>
                 <div class="flex items-center gap-2">
-                    <input id="distanceInput" type="number" placeholder="Enter distance" min="0" step="0.1" value="0" class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" oninput="calculateDeliveryFee()">
+                    <input id="distanceInput" type="text" value="0.00" readonly class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none">
                     <span class="text-sm text-gray-600 font-medium whitespace-nowrap">km</span>
                 </div>
+                <button type="button" onclick="calculateDeliveryFee()" class="mt-2 text-primary text-sm font-semibold hover:underline">Calculate from address</button>
             </div>
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
@@ -236,7 +257,7 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <span class="font-bold text-primary text-lg">₱<span id="deliveryFeeAmount">0.00</span></span>
             </div>
-            <p class="text-xs text-gray-400 mt-2">₱12 per kilometer</p>
+            <p id="deliveryFeeMeta" class="text-xs text-gray-400 mt-2">Fee will be computed via Google Maps distance.</p>
         </div>
 
         <!-- Schedule Delivery -->
@@ -296,17 +317,12 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <div>
                     <p class="font-semibold text-gray-800">Lola's Kusina Store</p>
-                    <p class="text-xs text-gray-500">123 Maligaya St., Quezon City, Metro Manila</p>
+                    <p class="text-xs text-gray-500"><?php echo htmlspecialchars($storeAddress, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
             </div>
-            <!-- Map placeholder -->
-            <div class="w-full h-40 bg-gray-100 rounded-xl mb-3 flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50"></div>
-                <div class="relative text-center">
-                    <svg class="w-8 h-8 text-primary mx-auto mb-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                    <p class="text-xs text-gray-500">Store Location</p>
-                </div>
-            </div>
+            <!-- Interactive pickup map -->
+            <div id="pickupMap" class="checkout-map mb-3"></div>
+            <a href="<?php echo htmlspecialchars($storeMapUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-primary text-sm font-semibold hover:underline inline-block mb-2">Open in Google Maps</a>
             <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-3">
                 <svg class="w-4 h-4 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                 <span class="text-xs text-green-700 font-semibold">Walang delivery fee — FREE pickup!</span>
@@ -533,32 +549,141 @@ include __DIR__ . '/layouts/header.php';
 
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 // ===== State =====
 let currentStep = 0; // Start at cart view (step 0)
 let orderMethod = 'delivery'; // 'delivery' or 'pickup'
 let deliveryFee = 0;
+let distanceKm = 0;
+let deliveryMap = null;
+let pickupMap = null;
+let deliveryMarker = null;
+let selectedDeliveryCoordinates = '';
 const subtotal = <?php echo $subtotal; ?>;
-const DELIVERY_RATE = 12; // 12 pesos per kilometer
+const STORE_ADDRESS = <?php echo json_encode($storeAddress, JSON_UNESCAPED_UNICODE); ?>;
+const STORE_LAT = <?php echo json_encode($storeLat); ?>;
+const STORE_LNG = <?php echo json_encode($storeLng); ?>;
+const DELIVERY_FEE_API = (BASE_PATH || '') + '/api/delivery-fee';
+const REVERSE_GEOCODE_API = (BASE_PATH || '') + '/api/reverse-geocode';
 
-// Calculate delivery fee based on distance
-function calculateDeliveryFee() {
-    const distanceInput = document.getElementById('distanceInput');
-    const distance = parseFloat(distanceInput.value) || 0;
-    
-    if (distance < 0) {
-        distanceInput.value = 0;
+function initMaps() {
+    if (typeof L === 'undefined') return;
+
+    if (!deliveryMap) {
+        deliveryMap = L.map('deliveryMap').setView([STORE_LAT, STORE_LNG], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(deliveryMap);
+
+        const storePin = L.marker([STORE_LAT, STORE_LNG]).addTo(deliveryMap);
+        storePin.bindPopup('Lola\'s Kusina (Store)').openPopup();
+
+        deliveryMap.on('click', function (event) {
+            const lat = Number(event.latlng.lat).toFixed(6);
+            const lng = Number(event.latlng.lng).toFixed(6);
+            selectedDeliveryCoordinates = lat + ',' + lng;
+
+            if (deliveryMarker) {
+                deliveryMap.removeLayer(deliveryMarker);
+            }
+            deliveryMarker = L.marker([lat, lng]).addTo(deliveryMap);
+            deliveryMarker.bindPopup('Pinned delivery location').openPopup();
+
+            document.getElementById('deliveryAddress').value = 'Loading address...';
+            reverseGeocodeAndPopulateAddress(lat, lng);
+            calculateDeliveryFee();
+        });
+    }
+
+    if (!pickupMap) {
+        pickupMap = L.map('pickupMap').setView([STORE_LAT, STORE_LNG], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(pickupMap);
+
+        const marker = L.marker([STORE_LAT, STORE_LNG]).addTo(pickupMap);
+        marker.bindPopup('Lola\'s Kusina (Pickup Location)').openPopup();
+    }
+}
+
+function ensureMapLayout() {
+    if (deliveryMap) deliveryMap.invalidateSize();
+    if (pickupMap) pickupMap.invalidateSize();
+}
+
+async function reverseGeocodeAndPopulateAddress(lat, lng) {
+    const addressInput = document.getElementById('deliveryAddress');
+
+    try {
+        const response = await fetch(REVERSE_GEOCODE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams({ lat: String(lat), lng: String(lng) }).toString(),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+            throw new Error(payload.message || 'Unable to convert pin location into address.');
+        }
+
+        addressInput.value = payload.data.address || selectedDeliveryCoordinates;
+    } catch (error) {
+        addressInput.value = selectedDeliveryCoordinates;
+        showToast(error.message || 'Could not fetch address for pinned location.');
+    }
+}
+
+// Calculate delivery fee via backend Google Matrix endpoint
+async function calculateDeliveryFee() {
+    const addressInput = document.getElementById('deliveryAddress');
+    const destination = selectedDeliveryCoordinates || (addressInput.value || '').trim();
+    const feeMeta = document.getElementById('deliveryFeeMeta');
+
+    if (!destination) {
+        showToast('Please enter a delivery address first.');
+        addressInput.focus();
         return;
     }
-    
-    deliveryFee = distance * DELIVERY_RATE;
-    
-    // Update display
-    document.getElementById('deliveryFeeAmount').textContent = deliveryFee.toLocaleString('en-PH', { minimumFractionDigits: 2 });
-    
-    // Update step 3 and 4 if they're visible
-    if (currentStep === 3) populateStep3();
-    if (currentStep === 4) populateReview();
+
+    feeMeta.textContent = 'Calculating fee...';
+
+    try {
+        const response = await fetch(DELIVERY_FEE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams({ destination }).toString(),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+            throw new Error(payload.message || 'Unable to calculate delivery fee.');
+        }
+
+        const data = payload.data;
+        distanceKm = Number(data.distance_km || 0);
+        deliveryFee = Number(data.delivery_fee || 0);
+
+        document.getElementById('distanceInput').value = distanceKm.toFixed(2);
+        document.getElementById('deliveryFeeAmount').textContent = deliveryFee.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        feeMeta.textContent = 'Distance: ' + (data.distance_text || (distanceKm.toFixed(2) + ' km')) + ' • ETA: ' + (data.duration_text || 'N/A');
+
+        if (currentStep === 3) populateStep3();
+        if (currentStep === 4) populateReview();
+    } catch (error) {
+        distanceKm = 0;
+        deliveryFee = 0;
+        document.getElementById('distanceInput').value = '0.00';
+        document.getElementById('deliveryFeeAmount').textContent = '0.00';
+        feeMeta.textContent = 'Fee calculation unavailable. Please verify address and try again.';
+        showToast(error.message || 'Unable to calculate delivery fee.');
+    }
 }
 
 // Map step number to the correct div ID based on current method
@@ -592,6 +717,10 @@ function goToStep(step) {
     if (step === 3) populateStep3();
     if (step === 4) populateReview();
 
+    if (step === 2) {
+        setTimeout(ensureMapLayout, 120);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -616,10 +745,8 @@ function validateStep(step) {
             document.getElementById('deliveryAddress').focus();
             return false;
         }
-        const distance = parseFloat(document.getElementById('distanceInput').value) || 0;
-        if (distance <= 0) {
-            showToast('Please enter a valid distance');
-            document.getElementById('distanceInput').focus();
+        if (deliveryFee <= 0 || distanceKm <= 0) {
+            showToast('Please calculate delivery fee first.');
             return false;
         }
     }
@@ -637,8 +764,13 @@ function selectMethod(method) {
     orderMethod = method;
     if (method === 'pickup') {
         deliveryFee = 0;
+        distanceKm = 0;
+        selectedDeliveryCoordinates = '';
+        document.getElementById('distanceInput').value = '0.00';
+        document.getElementById('deliveryFeeAmount').textContent = '0.00';
+        document.getElementById('deliveryFeeMeta').textContent = 'No delivery fee for pickup.';
     } else {
-        // Reset distance input for delivery
+        document.getElementById('deliveryFeeMeta').textContent = 'Fee will be computed via Google Maps distance.';
         calculateDeliveryFee();
     }
 
@@ -738,7 +870,7 @@ function populateReview() {
         document.getElementById('reviewDetailsLabel').textContent  = 'Pickup Details';
         document.getElementById('reviewAddressBadge').textContent  = 'LOCATION';
         document.getElementById('reviewArrivalBadge').textContent  = 'SCHEDULED PICKUP';
-        document.getElementById('reviewAddress').textContent = "Lola's Kusina Store — 123 Maligaya St., Quezon City";
+        document.getElementById('reviewAddress').textContent = "Lola's Kusina Store — " + STORE_ADDRESS;
     }
 
     // Schedule text
@@ -806,6 +938,17 @@ function showToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 2500);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    initMaps();
+    const addressInput = document.getElementById('deliveryAddress');
+    if (addressInput) {
+        addressInput.addEventListener('input', function () {
+            selectedDeliveryCoordinates = '';
+        });
+    }
+    setTimeout(ensureMapLayout, 120);
+});
 </script>
 
 <?php include __DIR__ . '/layouts/footer.php'; ?>

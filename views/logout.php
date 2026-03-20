@@ -23,5 +23,5 @@ session_destroy();
 
 $basePath = defined('BASE_PATH') ? BASE_PATH : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 if ($basePath === '.') $basePath = '';
-header('Location: ' . $basePath . '/index.php');
+header('Location: ' . $basePath . '/');
 exit;

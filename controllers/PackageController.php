@@ -16,7 +16,7 @@ class PackageController {
     /** Display all packages. */
     public function index() {
         $packages = $this->packageModel->getAllPackages();
-        include __DIR__ . '/../views/index.php';
+        include __DIR__ . '/../views/home.php';
     }
     
     /** Display a single package's details. */
@@ -35,13 +35,13 @@ class PackageController {
     /** Display packages filtered by category. */
     public function category($category) {
         $packages = $this->packageModel->getPackagesByCategory($category);
-        include __DIR__ . '/../views/index.php';
+        include __DIR__ . '/../views/home.php';
     }
     
     /** Display best-selling packages. */
     public function bestSellers() {
         $packages = $this->packageModel->getBestSellers();
-        include __DIR__ . '/../views/index.php';
+        include __DIR__ . '/../views/home.php';
     }
 }
 ?>

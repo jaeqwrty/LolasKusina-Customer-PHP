@@ -9,6 +9,7 @@
  */
 require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../services/OrderTotalCalculator.php';
+require_once __DIR__ . '/../services/GoogleMatrixService.php';
 
 class OrderController
 {
@@ -36,9 +37,24 @@ class OrderController
             exit();
         }
 
-        // SRP: delegate pricing math to the calculator service
-        $deliveryFee = 50;
-        $discount = $_POST['discount'] ?? 0;
+        // SRP: delegate pricing math to services
+        $orderMethod = trim((string) ($_POST['order_method'] ?? 'delivery'));
+        $deliveryFee = 0;
+        if ($orderMethod === 'delivery') {
+            $destination = trim((string) ($_POST['address'] ?? ''));
+            $matrixService = new GoogleMatrixService();
+            $deliveryResult = $matrixService->calculateDeliveryFee($destination);
+
+            if (!($deliveryResult['ok'] ?? false)) {
+                $_SESSION['error'] = 'Unable to calculate delivery fee. Please check your address and try again.';
+                header('Location: ' . (defined('BASE_PATH') ? BASE_PATH : '') . '/cart.php');
+                exit();
+            }
+
+            $deliveryFee = (float) $deliveryResult['delivery_fee'];
+        }
+
+        $discount = (float) ($_POST['discount'] ?? 0);
         $totals = $this->calculator->calculate($cartItems, $deliveryFee, $discount);
 
         // Prepare order data

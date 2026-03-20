@@ -11,14 +11,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include config
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/helpers/view_helpers.php';
 
 $pageTitle = "Log In - Lola's Kusina";
-$redirect = $_GET['redirect'] ?? BASE_PATH . '/index.php';
-
-// Validate redirect URL
-if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
-    $redirect = BASE_PATH . '/index.php';
-}
+$redirect = sanitizeRedirectPath($_GET['redirect'] ?? null);
 
 // Handle form submission
 $error = '';
@@ -219,7 +215,7 @@ if (!empty($_SESSION['user_id'])) {
                 </div>
 
                 <p class="text-gray-600 text-sm">Wala pang account? <a href="<?php echo htmlspecialchars(BASE_PATH . '/register.php?redirect=' . urlencode($redirect), ENT_QUOTES, 'UTF-8'); ?>" class="font-bold text-primary hover:text-orange-600 transition">Register dito</a></p>
-                <p class="text-center text-gray-400 text-xs hover:text-gray-600 transition">Continue browsing as guest</p>
+                <p class="text-center"><a href="<?php echo htmlspecialchars(BASE_PATH . '/', ENT_QUOTES, 'UTF-8'); ?>" class="text-gray-400 text-xs hover:text-gray-600 transition">Continue browsing as guest</a></p>
             </div>
         </div>
 
@@ -299,7 +295,7 @@ if (!empty($_SESSION['user_id'])) {
                 </div>
 
                 <p class="text-center text-gray-600 text-sm">Wala pang account? <a href="<?php echo htmlspecialchars(BASE_PATH . '/register.php?redirect=' . urlencode($redirect), ENT_QUOTES, 'UTF-8'); ?>" class="font-bold text-primary hover:text-orange-600 transition">Register dito</a></p>
-                <p class="text-center"><a href="<?php echo htmlspecialchars(BASE_PATH . '/index.php', ENT_QUOTES, 'UTF-8'); ?>" class="text-gray-400 text-xs hover:text-gray-600 transition">Continue browsing as guest</a></p>
+                <p class="text-center"><a href="<?php echo htmlspecialchars(BASE_PATH . '/', ENT_QUOTES, 'UTF-8'); ?>" class="text-gray-400 text-xs hover:text-gray-600 transition">Continue browsing as guest</a></p>
             </div><!-- end mobile card -->
 
             <!-- Brand footer -->
