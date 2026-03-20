@@ -13,25 +13,25 @@ $address = $_GET['address'] ?? '';
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">
+<div class="container mx-auto px-4 md:px-6 py-4 max-w-md md:max-w-2xl mb-20 md:mb-8">
     
     <!-- Success Icon -->
-    <div class="text-center mb-6 pt-4">
-        <div class="inline-flex items-center justify-center w-24 h-24 bg-primary rounded-full mb-5 shadow-lg">
+    <div class="text-center mb-4 pt-2">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4 shadow-lg">
             <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
             </svg>
         </div>
         <h1 class="text-2xl font-extrabold text-gray-800 mb-1">SALAMAT!</h1>
-        <h2 class="text-xl font-bold text-primary mb-2">ORDER RECEIVED!</h2>
+        <h2 class="text-lg font-bold text-primary mb-2">ORDER RECEIVED!</h2>
         <p class="text-sm text-gray-500 max-w-xs mx-auto">We've received your request and the kitchen is getting ready.</p>
     </div>
 
     <!-- Reference Number Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4 text-center">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3 text-center">
         <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-2">Reference Number</p>
         <div class="flex items-center justify-center gap-2 mb-3">
-            <span id="refNumber" class="text-2xl font-bold font-mono text-gray-800 tracking-wider"><?php echo htmlspecialchars($refNumber); ?></span>
+            <span id="refNumber" class="text-xl font-bold font-mono text-gray-800 tracking-wider"><?php echo htmlspecialchars($refNumber); ?></span>
             <button onclick="copyRef()" class="p-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition" title="Copy">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
             </button>
@@ -45,10 +45,10 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Order Summary -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3.5 mb-3">
         <div class="flex justify-between items-center mb-2">
             <span class="text-sm text-gray-600">Total Amount</span>
-            <span class="text-xl font-bold text-primary">₱<?php echo number_format((float)$totalAmount, 2); ?></span>
+            <span class="text-lg font-bold text-primary">₱<?php echo number_format((float)$totalAmount, 2); ?></span>
         </div>
         <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">Estimated Time</span>
@@ -57,19 +57,19 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Track Order CTA -->
-    <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-5 mb-4 text-center">
+    <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-4 mb-3 text-center">
         <div class="flex items-center justify-center gap-2 mb-2">
             <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
             <h3 class="font-bold text-gray-800 text-sm">GUSTO MO BA I-TRACK ANG ORDER?</h3>
         </div>
-        <p class="text-xs text-gray-500 mb-4">Create an account to see real-time updates and earn points for your next meal!</p>
-        <a href="<?php echo BASE_PATH; ?>/auth_gate.php" class="inline-block w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-orange-600 transition shadow-md">
+        <p class="text-xs text-gray-500 mb-3">Create an account to see real-time updates and earn points for your next meal!</p>
+        <a href="<?php echo BASE_PATH; ?>/auth_gate.php" class="inline-block w-full bg-primary text-white py-2.5 rounded-xl font-bold text-sm hover:bg-orange-600 transition shadow-md">
             GUMAWA NG ACCOUNT →
         </a>
     </div>
 
     <!-- Back to Home -->
-    <a href="<?php echo BASE_PATH ?: '/'; ?>" class="block text-center text-sm text-gray-500 font-medium hover:text-primary transition py-3">
+    <a href="<?php echo BASE_PATH ?: '/'; ?>" class="block text-center text-sm text-gray-500 font-medium hover:text-primary transition py-2">
         Bumalik sa Home
     </a>
 </div>

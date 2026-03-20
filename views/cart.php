@@ -90,9 +90,45 @@ include __DIR__ . '/layouts/header.php';
         border: 1px solid #e5e7eb;
         overflow: hidden;
     }
+
+    /* Compact layout tuning for the order flow */
+    .order-flow-compact .checkout-step .bg-white.rounded-2xl {
+        border-radius: 1rem;
+    }
+
+    .order-flow-compact .checkout-step .p-4 {
+        padding: 0.9rem;
+    }
+
+    .order-flow-compact .checkout-step .mb-4 {
+        margin-bottom: 0.75rem;
+    }
+
+    .order-flow-compact .checkout-step .mb-6 {
+        margin-bottom: 1rem;
+    }
+
+    .order-flow-compact .checkout-step .py-4 {
+        padding-top: 0.8rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .order-flow-compact .checkout-step .text-xl {
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+    }
+
+    .order-flow-compact .checkout-step .text-lg {
+        font-size: 1rem;
+        line-height: 1.35rem;
+    }
+
+    .order-flow-compact .checkout-step .text-sm {
+        line-height: 1.3rem;
+    }
 </style>
 
-<div class="container mx-auto px-4 md:px-8 py-4 max-w-md md:max-w-2xl mb-20 md:mb-8">
+<div class="order-flow-compact container mx-auto px-4 md:px-6 py-3 max-w-md md:max-w-4xl mb-20 md:mb-8">
     
     <!-- ==================== TOP NAV ==================== -->
     <div class="flex items-center justify-between mb-2">
@@ -111,62 +147,68 @@ include __DIR__ . '/layouts/header.php';
     <!-- ==================== STEP 0: VIEW CART ==================== -->
     <div id="step0" class="checkout-step active">
         <h2 class="text-xl font-bold text-primary leading-tight mb-1">My Cart</h2>
-        <p class="text-sm text-gray-500 mb-6">Review your items before checkout</p>
+        <p class="text-sm text-gray-500 mb-4">Review your items before checkout</p>
 
-        <!-- Cart Items -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
-            <div id="cartItemsList">
-                <?php foreach ($cartItems as $item): ?>
-                <div class="review-item">
-                    <div class="w-14 h-14 rounded-lg bg-orange-50 overflow-hidden shrink-0">
-                        <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($item['name']); ?></h4>
-                        <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($item['description']); ?></p>
-                    </div>
-                    <div class="flex flex-col items-end gap-2">
-                        <span class="font-bold text-gray-800 text-sm whitespace-nowrap">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
-                        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-2 py-1">
-                            <button onclick="updateQuantity(<?php echo $item['id']; ?>, -1)" class="text-gray-600 hover:text-gray-800">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
-                            </button>
-                            <span class="text-xs font-semibold text-gray-800 min-w-[1.5rem] text-center">x<?php echo $item['quantity']; ?></span>
-                            <button onclick="updateQuantity(<?php echo $item['id']; ?>, 1)" class="text-gray-600 hover:text-gray-800">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            </button>
+        <div class="md:grid md:grid-cols-[1.6fr_1fr] md:gap-4">
+            <div>
+                <!-- Cart Items -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
+                    <div id="cartItemsList">
+                        <?php foreach ($cartItems as $item): ?>
+                        <div class="review-item">
+                            <div class="w-14 h-14 rounded-lg bg-orange-50 overflow-hidden shrink-0">
+                                <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($item['name']); ?></h4>
+                                <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($item['description']); ?></p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="font-bold text-gray-800 text-sm whitespace-nowrap">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
+                                <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-2 py-1">
+                                    <button onclick="updateQuantity(<?php echo $item['id']; ?>, -1)" class="text-gray-600 hover:text-gray-800">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                                    </button>
+                                    <span class="text-xs font-semibold text-gray-800 min-w-[1.5rem] text-center">x<?php echo $item['quantity']; ?></span>
+                                    <button onclick="updateQuantity(<?php echo $item['id']; ?>, 1)" class="text-gray-600 hover:text-gray-800">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-                <?php endforeach; ?>
+            </div>
+
+            <div class="md:sticky md:top-24 self-start">
+                <!-- Cart Summary -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Subtotal</span>
+                        <span id="cartSubtotal" class="font-semibold text-gray-800">₱<?php echo number_format($subtotal, 2); ?></span>
+                    </div>
+                    <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between items-center">
+                        <span class="font-bold text-gray-800">Subtotal</span>
+                        <span id="cartTotal" class="font-bold text-primary text-lg">₱<?php echo number_format($subtotal, 2); ?></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-2.5">
+                    <button onclick="goToStep(1)" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-base shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                        PROCEED TO CHECKOUT
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <button onclick="continueShopping()" class="w-full bg-white text-primary py-2.5 rounded-xl font-bold border-2 border-primary hover:bg-orange-50 transition">
+                        CONTINUE SHOPPING
+                    </button>
+                </div>
+
+                <p class="text-center text-xs text-gray-400 mt-4">May problema sa order? <a href="#" class="text-primary font-semibold">Tumawag sa amin.</a></p>
             </div>
         </div>
-
-        <!-- Cart Summary -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm text-gray-600">Subtotal</span>
-                <span id="cartSubtotal" class="font-semibold text-gray-800">₱<?php echo number_format($subtotal, 2); ?></span>
-            </div>
-            <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between items-center">
-                <span class="font-bold text-gray-800">Subtotal</span>
-                <span id="cartTotal" class="font-bold text-primary text-lg">₱<?php echo number_format($subtotal, 2); ?></span>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="space-y-3">
-            <button onclick="goToStep(1)" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2">
-                PROCEED TO CHECKOUT
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
-            <button onclick="continueShopping()" class="w-full bg-white text-primary py-3 rounded-xl font-bold border-2 border-primary hover:bg-orange-50 transition">
-                CONTINUE SHOPPING
-            </button>
-        </div>
-
-        <p class="text-center text-xs text-gray-400 mt-6">May problema sa order? <a href="#" class="text-primary font-semibold">Tumawag sa amin.</a></p>
     </div>
         <!-- ==================== STEP 1: Delivery or Pickup ==================== -->
     <div id="step1" class="checkout-step">
@@ -267,7 +309,7 @@ include __DIR__ . '/layouts/header.php';
                 <!-- Date -->
                 <div>
                     <label class="text-xs text-gray-500 font-medium mb-1 block">DATE</label>
-                    <div class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleDate(this, 'today')">
+                    <div id="deliveryDateToday" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleDate(this, 'today')">
                         <div class="font-bold text-sm">Today</div>
                         <div class="schedule-sub text-xs text-gray-500"><?php echo date('M d, Y'); ?></div>
                     </div>
@@ -276,11 +318,8 @@ include __DIR__ . '/layouts/header.php';
                 <!-- Time -->
                 <div>
                     <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <div class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleTime(this, 'asap')">
-                        <div class="font-bold text-sm flex items-center justify-center gap-1">ASAP <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
-                        <div class="schedule-sub text-xs text-gray-500">~ 45 mins</div>
-                    </div>
-                    <input type="time" id="customTime" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <input type="time" id="customTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <p class="text-xs text-gray-400 mt-1">Select your preferred delivery time.</p>
                 </div>
             </div>
 
@@ -345,11 +384,8 @@ include __DIR__ . '/layouts/header.php';
                 <!-- Time -->
                 <div>
                     <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <div id="pickupTimeASAP" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectPickupTime(this, 'asap')">
-                        <div class="font-bold text-sm flex items-center justify-center gap-1">ASAP <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
-                        <div class="schedule-sub text-xs text-gray-500">~ 30 mins</div>
-                    </div>
-                    <input type="time" id="pickupCustomTime" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <input type="time" id="pickupCustomTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <p class="text-xs text-gray-400 mt-1">Select your preferred pickup time.</p>
                 </div>
             </div>
             <!-- Note -->
@@ -740,6 +776,8 @@ function validateStep(step) {
     if (step === 0) return true; // Cart view - no validation
     if (step === 2 && orderMethod === 'delivery') {
         const address = document.getElementById('deliveryAddress').value.trim();
+        const selectedDate = document.getElementById('customDate').value;
+        const selectedTime = document.getElementById('customTime').value;
         if (!address) {
             showToast('Please enter a delivery address');
             document.getElementById('deliveryAddress').focus();
@@ -747,6 +785,53 @@ function validateStep(step) {
         }
         if (deliveryFee <= 0 || distanceKm <= 0) {
             showToast('Please calculate delivery fee first.');
+            return false;
+        }
+        if (!selectedDate) {
+            showToast('Please select a delivery date.');
+            document.getElementById('customDate').focus();
+            return false;
+        }
+        if (!selectedTime) {
+            showToast('Please select a delivery time.');
+            document.getElementById('customTime').focus();
+            return false;
+        }
+
+        const scheduledAt = new Date(selectedDate + 'T' + selectedTime + ':00');
+        if (Number.isNaN(scheduledAt.getTime())) {
+            showToast('Invalid delivery date/time.');
+            return false;
+        }
+
+        if (scheduledAt <= new Date()) {
+            showToast('Delivery schedule must be later than the current date/time.');
+            return false;
+        }
+    }
+    if (step === 2 && orderMethod === 'pickup') {
+        const selectedDate = document.getElementById('pickupCustomDate').value;
+        const selectedTime = document.getElementById('pickupCustomTime').value;
+
+        if (!selectedDate) {
+            showToast('Please select a pickup date.');
+            document.getElementById('pickupCustomDate').focus();
+            return false;
+        }
+        if (!selectedTime) {
+            showToast('Please select a pickup time.');
+            document.getElementById('pickupCustomTime').focus();
+            return false;
+        }
+
+        const scheduledAt = new Date(selectedDate + 'T' + selectedTime + ':00');
+        if (Number.isNaN(scheduledAt.getTime())) {
+            showToast('Invalid pickup date/time.');
+            return false;
+        }
+
+        if (scheduledAt <= new Date()) {
+            showToast('Pickup schedule must be later than the current date/time.');
             return false;
         }
     }
@@ -790,11 +875,19 @@ function updateQuantity(itemId, change) {
 
 // ===== Step 2: Delivery schedule helpers =====
 function selectScheduleDate(el, type) {
+    document.querySelectorAll('#step2-delivery .schedule-option').forEach(opt => {
+        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
+        if (label === 'DATE') opt.classList.remove('selected');
+    });
     el.classList.add('selected');
-}
 
-function selectScheduleTime(el, type) {
-    el.classList.add('selected');
+    if (type === 'today') {
+        const today = new Date();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formatted = today.getFullYear() + '-' + month + '-' + day;
+        document.getElementById('customDate').value = formatted;
+    }
 }
 
 // ===== Step 2: Pickup schedule helpers =====
@@ -804,14 +897,14 @@ function selectPickupDate(el, type) {
         if (label === 'DATE') opt.classList.remove('selected');
     });
     el.classList.add('selected');
-}
 
-function selectPickupTime(el, type) {
-    document.querySelectorAll('#step2-pickup .schedule-option').forEach(opt => {
-        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
-        if (label === 'TIME') opt.classList.remove('selected');
-    });
-    el.classList.add('selected');
+    if (type === 'today') {
+        const today = new Date();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formatted = today.getFullYear() + '-' + month + '-' + day;
+        document.getElementById('pickupCustomDate').value = formatted;
+    }
 }
 
 // ===== Step 3: Populate dynamic totals =====
@@ -878,12 +971,12 @@ function populateReview() {
     const dateInput = document.getElementById(isPickup ? 'pickupCustomDate' : 'customDate');
     const timeInput = document.getElementById(isPickup ? 'pickupCustomTime' : 'customTime');
     const defaultWait = isPickup ? '~ 30 mins' : '~ 45 mins';
-    let schedText = 'Today, ASAP (' + defaultWait + ')';
-    if (dateInput.value || timeInput.value) {
+    let schedText = '-';
+    if (dateInput.value && timeInput.value) {
         const d = dateInput.value
             ? new Date(dateInput.value + 'T00:00:00').toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'Today';
-        const t = timeInput.value || 'ASAP';
+        const t = timeInput.value;
         schedText = d + ', ' + t;
     }
     document.getElementById('reviewArrival').textContent = schedText;
@@ -942,11 +1035,40 @@ function showToast(message) {
 document.addEventListener('DOMContentLoaded', function () {
     initMaps();
     const addressInput = document.getElementById('deliveryAddress');
+    const customDateInput = document.getElementById('customDate');
+    const pickupCustomDateInput = document.getElementById('pickupCustomDate');
     if (addressInput) {
         addressInput.addEventListener('input', function () {
             selectedDeliveryCoordinates = '';
         });
     }
+
+    if (customDateInput) {
+        customDateInput.addEventListener('change', function () {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayValue = today.getFullYear() + '-' + month + '-' + day;
+            const todayCard = document.getElementById('deliveryDateToday');
+            if (todayCard) {
+                todayCard.classList.toggle('selected', customDateInput.value === todayValue);
+            }
+        });
+    }
+
+    if (pickupCustomDateInput) {
+        pickupCustomDateInput.addEventListener('change', function () {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayValue = today.getFullYear() + '-' + month + '-' + day;
+            const todayCard = document.getElementById('pickupDateToday');
+            if (todayCard) {
+                todayCard.classList.toggle('selected', pickupCustomDateInput.value === todayValue);
+            }
+        });
+    }
+
     setTimeout(ensureMapLayout, 120);
 });
 </script>
