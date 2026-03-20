@@ -79,8 +79,25 @@ include __DIR__ . '/layouts/header.php';
     
     /* Schedule selectors */
     .schedule-option { cursor: pointer; transition: all 0.2s; }
-    .schedule-option.selected { background: #FF6B35; color: white; }
-    .schedule-option.selected .schedule-sub { color: rgba(255,255,255,0.8); }
+    .schedule-pill {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #ffffff;
+        padding: 0.6rem 0.7rem;
+        text-align: left;
+    }
+    .schedule-option.selected.schedule-pill {
+        background: #FFF7ED;
+        border-color: #FF6B35;
+        color: #C2410C;
+    }
+    .schedule-option.selected .schedule-sub { color: #EA580C; }
+    .schedule-shell {
+        border: 1px solid #F1F5F9;
+        background: #F8FAFC;
+        border-radius: 0.9rem;
+        padding: 0.75rem;
+    }
 
     /* Interactive maps */
     .checkout-map {
@@ -304,24 +321,32 @@ include __DIR__ . '/layouts/header.php';
 
         <!-- Schedule Delivery -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="font-semibold text-gray-800 mb-4">Schedule Delivery</h3>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Date -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">DATE</label>
-                    <div id="deliveryDateToday" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleDate(this, 'today')">
-                        <div class="font-bold text-sm">Today</div>
-                        <div class="schedule-sub text-xs text-gray-500"><?php echo date('M d, Y'); ?></div>
-                    </div>
-                    <input type="date" id="customDate" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
-                </div>
-                <!-- Time -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <input type="time" id="customTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                    <p class="text-xs text-gray-400 mt-1">Select your preferred delivery time.</p>
+            <h3 class="font-semibold text-gray-800 mb-3">Schedule Delivery</h3>
+            <div class="schedule-shell mb-3">
+                <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide mb-2">Quick Date</p>
+                <div class="grid grid-cols-2 gap-2" id="deliveryDateQuick">
+                    <button type="button" id="deliveryDateToday" class="schedule-option schedule-pill selected" onclick="selectScheduleDate(this, 'today')">
+                        <p class="text-sm font-bold">Today</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y'); ?></p>
+                    </button>
+                    <button type="button" id="deliveryDateTomorrow" class="schedule-option schedule-pill" onclick="selectScheduleDate(this, 'tomorrow')">
+                        <p class="text-sm font-bold">Tomorrow</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y', strtotime('+1 day')); ?></p>
+                    </button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Delivery Date</label>
+                    <input type="date" id="customDate" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Delivery Time</label>
+                    <input type="time" id="customTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" step="300">
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-3">Schedule must be later than the current time.</p>
 
             <!-- Note to rider -->
             <div>
@@ -370,24 +395,32 @@ include __DIR__ . '/layouts/header.php';
 
         <!-- Schedule Pickup -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="font-semibold text-gray-800 mb-4">Schedule Pickup</h3>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Date -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">DATE</label>
-                    <div id="pickupDateToday" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectPickupDate(this, 'today')">
-                        <div class="font-bold text-sm">Today</div>
-                        <div class="schedule-sub text-xs text-gray-500"><?php echo date('M d, Y'); ?></div>
-                    </div>
-                    <input type="date" id="pickupCustomDate" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
-                </div>
-                <!-- Time -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <input type="time" id="pickupCustomTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                    <p class="text-xs text-gray-400 mt-1">Select your preferred pickup time.</p>
+            <h3 class="font-semibold text-gray-800 mb-3">Schedule Pickup</h3>
+            <div class="schedule-shell mb-3">
+                <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide mb-2">Quick Date</p>
+                <div class="grid grid-cols-2 gap-2" id="pickupDateQuick">
+                    <button type="button" id="pickupDateToday" class="schedule-option schedule-pill selected" onclick="selectPickupDate(this, 'today')">
+                        <p class="text-sm font-bold">Today</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y'); ?></p>
+                    </button>
+                    <button type="button" id="pickupDateTomorrow" class="schedule-option schedule-pill" onclick="selectPickupDate(this, 'tomorrow')">
+                        <p class="text-sm font-bold">Tomorrow</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y', strtotime('+1 day')); ?></p>
+                    </button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Pickup Date</label>
+                    <input type="date" id="pickupCustomDate" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Pickup Time</label>
+                    <input type="time" id="pickupCustomTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" step="300">
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-3">Schedule must be later than the current time.</p>
             <!-- Note -->
             <div>
                 <label class="text-xs text-gray-500 font-medium mb-1 block">Note to store (optional)</label>
@@ -873,38 +906,77 @@ function updateQuantity(itemId, change) {
     showToast('Quantity updated. (Session sync coming soon)');
 }
 
+function getLocalDateString(offsetDays = 0) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offsetDays);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return date.getFullYear() + '-' + month + '-' + day;
+}
+
+function updateQuickDateState(inputId, todayId, tomorrowId) {
+    const input = document.getElementById(inputId);
+    const todayChip = document.getElementById(todayId);
+    const tomorrowChip = document.getElementById(tomorrowId);
+    if (!input || !todayChip || !tomorrowChip) return;
+
+    const today = getLocalDateString(0);
+    const tomorrow = getLocalDateString(1);
+    todayChip.classList.toggle('selected', input.value === today);
+    tomorrowChip.classList.toggle('selected', input.value === tomorrow);
+}
+
+function enforceMinTimeForDate(dateInputId, timeInputId) {
+    const dateInput = document.getElementById(dateInputId);
+    const timeInput = document.getElementById(timeInputId);
+    if (!dateInput || !timeInput) return;
+
+    const selectedDate = dateInput.value;
+    const today = getLocalDateString(0);
+    if (selectedDate === today) {
+        const minDate = new Date(Date.now() + (5 * 60 * 1000));
+        const minHours = String(minDate.getHours()).padStart(2, '0');
+        const minMinutes = String(minDate.getMinutes()).padStart(2, '0');
+        const minTime = minHours + ':' + minMinutes;
+        timeInput.min = minTime;
+        if (timeInput.value && timeInput.value < minTime) {
+            timeInput.value = '';
+        }
+        return;
+    }
+
+    timeInput.min = '00:00';
+}
+
 // ===== Step 2: Delivery schedule helpers =====
 function selectScheduleDate(el, type) {
-    document.querySelectorAll('#step2-delivery .schedule-option').forEach(opt => {
-        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
-        if (label === 'DATE') opt.classList.remove('selected');
-    });
-    el.classList.add('selected');
+    const dateInput = document.getElementById('customDate');
+    if (!dateInput) return;
 
     if (type === 'today') {
-        const today = new Date();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const formatted = today.getFullYear() + '-' + month + '-' + day;
-        document.getElementById('customDate').value = formatted;
+        dateInput.value = getLocalDateString(0);
+    } else if (type === 'tomorrow') {
+        dateInput.value = getLocalDateString(1);
     }
+
+    updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+    enforceMinTimeForDate('customDate', 'customTime');
 }
 
 // ===== Step 2: Pickup schedule helpers =====
 function selectPickupDate(el, type) {
-    document.querySelectorAll('#step2-pickup .schedule-option').forEach(opt => {
-        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
-        if (label === 'DATE') opt.classList.remove('selected');
-    });
-    el.classList.add('selected');
+    const dateInput = document.getElementById('pickupCustomDate');
+    if (!dateInput) return;
 
     if (type === 'today') {
-        const today = new Date();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const formatted = today.getFullYear() + '-' + month + '-' + day;
-        document.getElementById('pickupCustomDate').value = formatted;
+        dateInput.value = getLocalDateString(0);
+    } else if (type === 'tomorrow') {
+        dateInput.value = getLocalDateString(1);
     }
+
+    updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+    enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
 }
 
 // ===== Step 3: Populate dynamic totals =====
@@ -1044,28 +1116,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (customDateInput) {
+        if (!customDateInput.value) {
+            customDateInput.value = getLocalDateString(0);
+        }
+        updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+        enforceMinTimeForDate('customDate', 'customTime');
+
         customDateInput.addEventListener('change', function () {
-            const today = new Date();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const todayValue = today.getFullYear() + '-' + month + '-' + day;
-            const todayCard = document.getElementById('deliveryDateToday');
-            if (todayCard) {
-                todayCard.classList.toggle('selected', customDateInput.value === todayValue);
-            }
+            updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+            enforceMinTimeForDate('customDate', 'customTime');
         });
     }
 
     if (pickupCustomDateInput) {
+        if (!pickupCustomDateInput.value) {
+            pickupCustomDateInput.value = getLocalDateString(0);
+        }
+        updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+        enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
+
         pickupCustomDateInput.addEventListener('change', function () {
-            const today = new Date();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const todayValue = today.getFullYear() + '-' + month + '-' + day;
-            const todayCard = document.getElementById('pickupDateToday');
-            if (todayCard) {
-                todayCard.classList.toggle('selected', pickupCustomDateInput.value === todayValue);
-            }
+            updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+            enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
         });
     }
 

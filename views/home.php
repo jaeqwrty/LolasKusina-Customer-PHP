@@ -18,26 +18,51 @@ include __DIR__ . '/layouts/header.php';
             </a>
         </div>
 
-        <!-- Category Menu (inline on desktop) -->
-        <div class="hidden md:flex flex-col space-y-2 w-48 shrink-0">
-            <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Filter</p>
-            <button onclick="filterPackages('all')" class="bg-primary text-white px-4 py-2 rounded-full font-semibold shadow-md category-btn active text-left" data-category="all">All Packages</button>
-            <button onclick="filterPackages('fiesta')" class="bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-gray-100 category-btn text-left" data-category="fiesta">Fiesta Trays</button>
-            <button onclick="filterPackages('dessert')" class="bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-gray-100 category-btn text-left" data-category="dessert">Desserts</button>
+        <!-- Category Menu (inline on desktop, frameless) -->
+        <div class="hidden md:block w-56 shrink-0">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-[0.2em] mb-2">Quick Filter</p>
+            <div class="space-y-2">
+                <button onclick="filterPackages('all')" class="category-btn active w-full flex items-center justify-between text-left px-4 py-2.5 rounded-xl font-semibold transition duration-200 bg-primary text-white shadow-md" data-category="all" aria-pressed="true">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M2 5.5A2.5 2.5 0 014.5 3h11A2.5 2.5 0 0118 5.5v9a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 012 14.5v-9zm3.5.5a.5.5 0 000 1h9a.5.5 0 000-1h-9zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6zm0 3a.5.5 0 000 1h8a.5.5 0 000-1h-8z"></path>
+                        </svg>
+                        <span>All Packages</span>
+                    </span>
+                </button>
+                <button onclick="filterPackages('fiesta')" class="category-btn w-full flex items-center justify-between text-left px-4 py-2.5 rounded-xl font-semibold transition duration-200 bg-white text-gray-700 border border-gray-200 hover:bg-orange-50 hover:border-orange-200" data-category="fiesta" aria-pressed="false">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M10 2a1 1 0 01.92.606l1.38 3.22 3.48.3a1 1 0 01.57 1.76l-2.64 2.28.8 3.38a1 1 0 01-1.49 1.07L10 12.96 7.01 14.7a1 1 0 01-1.49-1.07l.8-3.38L3.68 7.98a1 1 0 01.57-1.76l3.48-.3 1.38-3.22A1 1 0 0110 2z"></path>
+                        </svg>
+                        <span>Fiesta Trays</span>
+                    </span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Category Menu (horizontal scroll on mobile only) -->
-    <div class="flex md:hidden space-x-2 mb-6 overflow-x-auto pb-2">
-        <button onclick="filterPackages('all')" class="bg-primary text-white px-6 py-2 rounded-full font-semibold whitespace-nowrap shadow-md category-btn active" data-category="all">
-            All Packages
-        </button>
-        <button onclick="filterPackages('fiesta')" class="bg-white text-gray-700 px-6 py-2 rounded-full font-semibold whitespace-nowrap shadow-md hover:bg-gray-100 category-btn" data-category="fiesta">
-            Fiesta Trays
-        </button>
-        <button onclick="filterPackages('dessert')" class="bg-white text-gray-700 px-6 py-2 rounded-full font-semibold whitespace-nowrap shadow-md hover:bg-gray-100 category-btn" data-category="dessert">
-            Desserts
-        </button>
+    <!-- Category Menu (horizontal scroll on mobile only, frameless) -->
+    <div class="md:hidden mb-6">
+        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Filter Packages</p>
+        <div class="flex space-x-2 overflow-x-auto pb-1">
+            <button onclick="filterPackages('all')" class="category-btn active px-5 py-2.5 rounded-xl font-semibold whitespace-nowrap transition duration-200 bg-primary text-white shadow-md" data-category="all" aria-pressed="true">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M2 5.5A2.5 2.5 0 014.5 3h11A2.5 2.5 0 0118 5.5v9a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 012 14.5v-9zm3.5.5a.5.5 0 000 1h9a.5.5 0 000-1h-9zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6zm0 3a.5.5 0 000 1h8a.5.5 0 000-1h-8z"></path>
+                    </svg>
+                    <span>All Packages</span>
+                </span>
+            </button>
+            <button onclick="filterPackages('fiesta')" class="category-btn px-5 py-2.5 rounded-xl font-semibold whitespace-nowrap transition duration-200 bg-white text-gray-700 border border-gray-200 hover:bg-orange-50 hover:border-orange-200" data-category="fiesta" aria-pressed="false">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10 2a1 1 0 01.92.606l1.38 3.22 3.48.3a1 1 0 01.57 1.76l-2.64 2.28.8 3.38a1 1 0 01-1.49 1.07L10 12.96 7.01 14.7a1 1 0 01-1.49-1.07l.8-3.38L3.68 7.98a1 1 0 01.57-1.76l3.48-.3 1.38-3.22A1 1 0 0110 2z"></path>
+                    </svg>
+                    <span>Fiesta Trays</span>
+                </span>
+            </button>
+        </div>
     </div>
 
     <!-- Best Sellers Section -->
@@ -130,17 +155,26 @@ include __DIR__ . '/layouts/header.php';
 </div>
 
 <script>
+const FILTER_ACTIVE_ANIMATION_CLASS = 'filter-active-pop';
+
 // Category filtering functionality
 function filterPackages(category) {
     // Update button styles
     const buttons = document.querySelectorAll('.category-btn');
     buttons.forEach(btn => {
         if (btn.dataset.category === category) {
-            btn.classList.remove('bg-white', 'text-gray-700');
-            btn.classList.add('bg-primary', 'text-white', 'active');
+            btn.classList.remove('bg-white', 'text-gray-700', 'border', 'border-gray-200', 'hover:bg-orange-50', 'hover:border-orange-200');
+            btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'active');
+            btn.setAttribute('aria-pressed', 'true');
+
+            // Re-trigger a subtle scale animation every time this filter is selected.
+            btn.classList.remove(FILTER_ACTIVE_ANIMATION_CLASS);
+            void btn.offsetWidth;
+            btn.classList.add(FILTER_ACTIVE_ANIMATION_CLASS);
         } else {
-            btn.classList.remove('bg-primary', 'text-white', 'active');
-            btn.classList.add('bg-white', 'text-gray-700');
+            btn.classList.remove('bg-primary', 'text-white', 'active', 'shadow-md', FILTER_ACTIVE_ANIMATION_CLASS);
+            btn.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200', 'hover:bg-orange-50', 'hover:border-orange-200');
+            btn.setAttribute('aria-pressed', 'false');
         }
     });
     
@@ -154,5 +188,17 @@ window.addEventListener('beforeunload', function() {
     window.scrollTo(0, 0);
 });
 </script>
+
+<style>
+@keyframes filterPop {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+.filter-active-pop {
+    animation: filterPop 240ms ease-out;
+}
+</style>
 
 <?php include __DIR__ . '/layouts/footer.php'; ?>
