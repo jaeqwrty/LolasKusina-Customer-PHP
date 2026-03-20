@@ -49,6 +49,11 @@
             -webkit-touch-callout: none;
             overscroll-behavior-y: contain;
         }
+
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
         
         /* Safe Area Insets for notched devices */
         .safe-top { padding-top: env(safe-area-inset-top); }
