@@ -1,21 +1,11 @@
 <?php
-// Auth guard — redirect unauthenticated users to the auth gate
-require_once __DIR__ . '/../config/auth.php';
-requireAuth('/write_review.php', true); // Preserve query string for package ID
-
-// Write a Review Page
-$pageTitle = "Mag-Review - Lola's Kusina";
-$currentPage = "reviews";
+/**
+ * Write Review View — Pure presentation (SRP)
+ * 
+ * Auth guard and data loading handled by router closure.
+ * Receives: $package, $packageId, $pageTitle, $currentPage from controller.
+ */
 include __DIR__ . '/layouts/header.php';
-
-// Get package id if passed
-$packageId = $_GET['package'] ?? 1;
-$packages = [
-    1 => ['name' => 'Paborito Package', 'image' => 'paborito-package.jpg', 'order' => 'PH-10795'],
-    2 => ['name' => 'Family Fiesta', 'image' => 'family-fiesta.jpg', 'order' => 'PH-10800'],
-    3 => ['name' => 'Salo-Salo Special', 'image' => 'salo-salo.jpg', 'order' => 'PH-10812'],
-];
-$package = $packages[$packageId] ?? $packages[1];
 ?>
 
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">

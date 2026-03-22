@@ -128,8 +128,32 @@ $routes = [
     // Reviews
     'reviews.php'                 => '/../views/reviews.php',
     'views/reviews.php'           => '/../views/reviews.php',
-    'write_review.php'            => '/../views/write_review.php',
-    'views/write_review.php'      => '/../views/write_review.php',
+    'write_review.php'            => function() use ($container) {
+        $container->getAuthGuard()->requireAuth('/write_review.php');
+        $packageId = $_GET['package'] ?? 1;
+        $packages = [
+            1 => ['name' => 'Paborito Package', 'image' => 'paborito-package.jpg', 'order' => 'PH-10795'],
+            2 => ['name' => 'Family Fiesta', 'image' => 'family-fiesta.jpg', 'order' => 'PH-10800'],
+            3 => ['name' => 'Salo-Salo Special', 'image' => 'salo-salo.jpg', 'order' => 'PH-10812'],
+        ];
+        $package = $packages[$packageId] ?? $packages[1];
+        $pageTitle = "Mag-Review - Lola's Kusina";
+        $currentPage = "reviews";
+        include __DIR__ . '/../views/write_review.php';
+    },
+    'views/write_review.php'      => function() use ($container) {
+        $container->getAuthGuard()->requireAuth('/write_review.php');
+        $packageId = $_GET['package'] ?? 1;
+        $packages = [
+            1 => ['name' => 'Paborito Package', 'image' => 'paborito-package.jpg', 'order' => 'PH-10795'],
+            2 => ['name' => 'Family Fiesta', 'image' => 'family-fiesta.jpg', 'order' => 'PH-10800'],
+            3 => ['name' => 'Salo-Salo Special', 'image' => 'salo-salo.jpg', 'order' => 'PH-10812'],
+        ];
+        $package = $packages[$packageId] ?? $packages[1];
+        $pageTitle = "Mag-Review - Lola's Kusina";
+        $currentPage = "reviews";
+        include __DIR__ . '/../views/write_review.php';
+    },
     'review_success.php'          => '/../views/review_success.php',
     'views/review_success.php'    => '/../views/review_success.php',
 
