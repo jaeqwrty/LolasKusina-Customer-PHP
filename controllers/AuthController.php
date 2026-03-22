@@ -4,16 +4,16 @@
  * 
  * Extracted from login.php and register.php views so they contain
  * only presentation logic.
- * DIP: Depends on User model and ValidatorInterface, not concrete classes.
+ * DIP: Depends on UserModelInterface and ValidatorInterface, not concrete classes.
  */
-require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../config/UserModelInterface.php';
 require_once __DIR__ . '/../config/ValidatorInterface.php';
 
 class AuthController {
     private $userModel;
     private $validator;
     
-    public function __construct(User $userModel, ValidatorInterface $validator) {
+    public function __construct(UserModelInterface $userModel, ValidatorInterface $validator) {
         $this->userModel = $userModel;
         $this->validator = $validator;
     }

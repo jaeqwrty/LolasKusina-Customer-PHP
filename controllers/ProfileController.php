@@ -2,17 +2,25 @@
 /**
  * Profile Controller — SRP: handles profile viewing and updating only
  * 
- * Extracted from profile.php view so it contains only presentation logic.
- * DIP: Depends on User model, not concrete Database class.
+ * DIP: Depends on UserModelInterface, OrderModelInterface, AuthGuard — no concrete classes.
  */
-require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ . '/../config/auth.php';
+require_once __DIR__ . '/../config/UserModelInterface.php';
+require_once __DIR__ . '/../config/OrderModelInterface.php';
+require_once __DIR__ . '/../config/AuthGuard.php';
 
 class ProfileController {
     private $userModel;
+    private $orderModel;
+    private $authGuard;
     
-    public function __construct(User $userModel) {
+    public function __construct(
+        UserModelInterface $userModel,
+        OrderModelInterface $orderModel,
+        AuthGuard $authGuard
+    ) {
         $this->userModel = $userModel;
+        $this->orderModel = $orderModel;
+        $this->authGuard = $authGuard;
     }
     
     /**
@@ -20,8 +28,8 @@ class ProfileController {
      * Handles profile update on POST.
      */
     public function show() {
-        // Auth guard — redirect unauthenticated users
-        requireAuth('/profile.php');
+        // Auth guard — redirect unauthenticated users (DIP: injected, not global fn)
+        $this->authGuard->requireAuth('/profile.php');
         
         $userId = (int)$_SESSION['user_id'];
         
@@ -72,8 +80,8 @@ class ProfileController {
             $avatarInitial = strtoupper(substr(trim(explode(' ', $newName)[0] ?? 'U'), 0, 1));
         }
         
-        // Fetch user's real orders
-        $ordersResult = $this->userModel->getCustomerOrders($userId);
+        // SRP: Order queries delegated to OrderModel, not User model
+        $ordersResult = $this->orderModel->getCustomerOrdersWithDetails($userId);
         $orders = array_map(fn($o) => [
             'ref'    => $o['reference_number'] ?? ('PH-' . str_pad($o['order_id'], 5, '0', STR_PAD_LEFT)),
             'date'   => date('M j, Y • g:i A', strtotime($o['created_at'])),
@@ -94,3 +102,4 @@ class ProfileController {
     }
 }
 ?>
+

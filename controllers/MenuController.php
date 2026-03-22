@@ -2,14 +2,14 @@
 /**
  * Menu Controller — Handles menu browsing and custom package building
  * 
- * DIP: MenuItem model is injected via constructor, not created internally.
+ * DIP: Depends on MenuItemModelInterface, not concrete MenuItem class.
  */
-require_once __DIR__ . '/../models/MenuItem.php';
+require_once __DIR__ . '/../config/MenuItemModelInterface.php';
 
 class MenuController {
     private $menuItemModel;
     
-    public function __construct(MenuItem $menuItemModel) {
+    public function __construct(MenuItemModelInterface $menuItemModel) {
         $this->menuItemModel = $menuItemModel;
     }
     

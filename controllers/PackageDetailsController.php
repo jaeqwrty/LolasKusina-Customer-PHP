@@ -3,14 +3,14 @@
  * Package Details Controller — SRP: handles package detail page data loading
  * 
  * Extracted from package_details.php view so the view contains only presentation.
- * DIP: Depends on Package model (which depends on DatabaseInterface).
+ * DIP: Depends on PackageModelInterface, not concrete Package class.
  */
-require_once __DIR__ . '/../models/Package.php';
+require_once __DIR__ . '/../config/PackageModelInterface.php';
 
 class PackageDetailsController {
     private $packageModel;
     
-    public function __construct(Package $packageModel) {
+    public function __construct(PackageModelInterface $packageModel) {
         $this->packageModel = $packageModel;
     }
     

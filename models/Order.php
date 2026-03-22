@@ -2,12 +2,13 @@
 /**
  * Order Model — Data access for orders and order_items tables
  * 
- * DIP: Depends on DatabaseInterface, not the concrete Database class.
- * Dependency is injected via constructor.
+ * DIP: Depends on DatabaseInterface, implements OrderModelInterface.
+ * SRP: All order-related queries live here (not in User model).
  */
 require_once __DIR__ . '/../config/DatabaseInterface.php';
+require_once __DIR__ . '/../config/OrderModelInterface.php';
 
-class Order {
+class Order implements OrderModelInterface {
     private $db;
     
     public function __construct(DatabaseInterface $db) {
@@ -149,6 +150,30 @@ class Order {
             error_log("Order::updateOrderStatus failed: " . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Get customer orders with payment and first item details (for profile page).
+     * Moved from User model to respect SRP — order queries belong in Order model.
+     *
+     * @param int $customerId Customer user ID
+     * @return array
+     */
+    public function getCustomerOrdersWithDetails(int $customerId): array {
+        $result = $this->db->execute(
+            "SELECT o.order_id, o.reference_number, o.created_at, o.status,
+                    op.grand_total,
+                    (SELECT mi.name FROM order_items oi
+                     JOIN menu_items mi ON mi.item_id = oi.item_id
+                     WHERE oi.order_id = o.order_id
+                     ORDER BY oi.order_item_id ASC LIMIT 1) AS first_item
+             FROM orders o
+             LEFT JOIN order_payments op ON op.order_id = o.order_id
+             WHERE o.customer_id = ?
+             ORDER BY o.created_at DESC",
+            [$customerId]
+        );
+        return is_array($result) ? $result : [];
     }
 }
 ?>

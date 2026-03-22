@@ -2,14 +2,14 @@
 /**
  * Package Controller — Handles package listing and detail views
  * 
- * DIP: Package model is injected via constructor, not created internally.
+ * DIP: Depends on PackageModelInterface, not concrete Package class.
  */
-require_once __DIR__ . '/../models/Package.php';
+require_once __DIR__ . '/../config/PackageModelInterface.php';
 
 class PackageController {
     private $packageModel;
     
-    public function __construct(Package $packageModel) {
+    public function __construct(PackageModelInterface $packageModel) {
         $this->packageModel = $packageModel;
     }
     

@@ -3,8 +3,7 @@
  * Service Container — DIP: Centralized dependency wiring
  * 
  * Lazy-loads and wires all dependencies so that controllers never
- * instantiate concrete classes directly. Replaces the global getDb()/getValidator()
- * functions that previously lived in the router.
+ * instantiate concrete classes directly. All getters return interfaces.
  * 
  * SRP: This class only manages object creation and wiring.
  */
@@ -14,12 +13,17 @@ require_once __DIR__ . '/CalculatorInterface.php';
 require_once __DIR__ . '/DeliveryFeeCalculatorInterface.php';
 require_once __DIR__ . '/ReferenceGeneratorInterface.php';
 require_once __DIR__ . '/FileUploadValidatorInterface.php';
+require_once __DIR__ . '/UserModelInterface.php';
+require_once __DIR__ . '/OrderModelInterface.php';
+require_once __DIR__ . '/PackageModelInterface.php';
+require_once __DIR__ . '/MenuItemModelInterface.php';
+require_once __DIR__ . '/AuthGuard.php';
 
 class ServiceContainer {
     private $instances = [];
     
     /**
-     * Get the Database instance (lazy-loaded singleton).
+     * Get the Database instance (lazy-loaded).
      *
      * @return DatabaseInterface
      */
@@ -83,11 +87,23 @@ class ServiceContainer {
     }
     
     /**
+     * Get the AuthGuard instance.
+     *
+     * @return AuthGuard
+     */
+    public function getAuthGuard(): AuthGuard {
+        if (!isset($this->instances['authGuard'])) {
+            $this->instances['authGuard'] = new AuthGuard();
+        }
+        return $this->instances['authGuard'];
+    }
+    
+    /**
      * Get the User model instance.
      *
-     * @return User
+     * @return UserModelInterface
      */
-    public function getUserModel(): User {
+    public function getUserModel(): UserModelInterface {
         if (!isset($this->instances['user'])) {
             require_once __DIR__ . '/../models/User.php';
             $this->instances['user'] = new User($this->getDatabase());
@@ -98,9 +114,9 @@ class ServiceContainer {
     /**
      * Get the Order model instance.
      *
-     * @return Order
+     * @return OrderModelInterface
      */
-    public function getOrderModel(): Order {
+    public function getOrderModel(): OrderModelInterface {
         if (!isset($this->instances['order'])) {
             require_once __DIR__ . '/../models/Order.php';
             $this->instances['order'] = new Order($this->getDatabase());
@@ -111,9 +127,9 @@ class ServiceContainer {
     /**
      * Get the Package model instance.
      *
-     * @return Package
+     * @return PackageModelInterface
      */
-    public function getPackageModel(): Package {
+    public function getPackageModel(): PackageModelInterface {
         if (!isset($this->instances['package'])) {
             require_once __DIR__ . '/../models/Package.php';
             $this->instances['package'] = new Package($this->getDatabase());
@@ -124,9 +140,9 @@ class ServiceContainer {
     /**
      * Get the MenuItem model instance.
      *
-     * @return MenuItem
+     * @return MenuItemModelInterface
      */
-    public function getMenuItemModel(): MenuItem {
+    public function getMenuItemModel(): MenuItemModelInterface {
         if (!isset($this->instances['menuItem'])) {
             require_once __DIR__ . '/../models/MenuItem.php';
             $this->instances['menuItem'] = new MenuItem($this->getDatabase());
@@ -135,3 +151,4 @@ class ServiceContainer {
     }
 }
 ?>
+

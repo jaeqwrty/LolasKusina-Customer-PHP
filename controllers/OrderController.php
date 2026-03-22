@@ -6,7 +6,7 @@
  * Pricing math has been extracted to OrderTotalCalculator.
  * DIP: All dependencies are injected as interfaces, not concrete classes.
  */
-require_once __DIR__ . '/../models/Order.php';
+require_once __DIR__ . '/../config/OrderModelInterface.php';
 require_once __DIR__ . '/../config/CalculatorInterface.php';
 require_once __DIR__ . '/../config/ValidatorInterface.php';
 require_once __DIR__ . '/../config/ReferenceGeneratorInterface.php';
@@ -20,7 +20,7 @@ class OrderController {
     private $deliveryFeeCalculator;
     
     public function __construct(
-        Order $orderModel,
+        OrderModelInterface $orderModel,
         CalculatorInterface $calculator,
         ValidatorInterface $validator,
         ReferenceGeneratorInterface $referenceGenerator,

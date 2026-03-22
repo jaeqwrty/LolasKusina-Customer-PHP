@@ -1,14 +1,15 @@
 <?php
 /**
- * User Model — SRP: Data access for the users table
+ * User Model — SRP: Data access for the users table only
  * 
- * DIP: Depends on DatabaseInterface, not the concrete Database class.
+ * DIP: Depends on DatabaseInterface, implements UserModelInterface.
  * Extracted from login.php, register.php, profile.php views so they
  * contain only presentation logic.
  */
 require_once __DIR__ . '/../config/DatabaseInterface.php';
+require_once __DIR__ . '/../config/UserModelInterface.php';
 
-class User {
+class User implements UserModelInterface {
     private $db;
     
     public function __construct(DatabaseInterface $db) {
@@ -114,28 +115,6 @@ class User {
         }
         return !empty($result);
     }
-    
-    /**
-     * Get all orders for a customer with payment and item details.
-     *
-     * @param int $userId Customer user ID
-     * @return array      List of order records
-     */
-    public function getCustomerOrders(int $userId): array {
-        $result = $this->db->execute(
-            "SELECT o.order_id, o.reference_number, o.created_at, o.status,
-                    op.grand_total,
-                    (SELECT mi.name FROM order_items oi
-                     JOIN menu_items mi ON mi.item_id = oi.item_id
-                     WHERE oi.order_id = o.order_id
-                     ORDER BY oi.order_item_id ASC LIMIT 1) AS first_item
-             FROM orders o
-             LEFT JOIN order_payments op ON op.order_id = o.order_id
-             WHERE o.customer_id = ?
-             ORDER BY o.created_at DESC",
-            [$userId]
-        );
-        return is_array($result) ? $result : [];
-    }
 }
 ?>
+

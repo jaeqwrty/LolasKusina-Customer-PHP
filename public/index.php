@@ -80,12 +80,12 @@ $routes = [
     // Profile — SRP: controller handles data + auth guard, view is pure presentation
     'profile.php' => function() use ($container) {
         require_once __DIR__ . '/../controllers/ProfileController.php';
-        $controller = new ProfileController($container->getUserModel());
+        $controller = new ProfileController($container->getUserModel(), $container->getOrderModel(), $container->getAuthGuard());
         $controller->show();
     },
     'views/profile.php' => function() use ($container) {
         require_once __DIR__ . '/../controllers/ProfileController.php';
-        $controller = new ProfileController($container->getUserModel());
+        $controller = new ProfileController($container->getUserModel(), $container->getOrderModel(), $container->getAuthGuard());
         $controller->show();
     },
 

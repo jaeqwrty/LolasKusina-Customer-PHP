@@ -2,12 +2,12 @@
 /**
  * MenuItem Model — Data access for menu_items table
  * 
- * DIP: Depends on DatabaseInterface, not the concrete Database class.
- * Dependency is injected via constructor.
+ * DIP: Depends on DatabaseInterface, implements MenuItemModelInterface.
  */
 require_once __DIR__ . '/../config/DatabaseInterface.php';
+require_once __DIR__ . '/../config/MenuItemModelInterface.php';
 
-class MenuItem {
+class MenuItem implements MenuItemModelInterface {
     private $db;
     
     public function __construct(DatabaseInterface $db) {

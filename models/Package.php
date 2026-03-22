@@ -2,12 +2,12 @@
 /**
  * Package Model — Data access for packages and package_items tables
  * 
- * DIP: Depends on DatabaseInterface, not the concrete Database class.
- * Dependency is injected via constructor.
+ * DIP: Depends on DatabaseInterface, implements PackageModelInterface.
  */
 require_once __DIR__ . '/../config/DatabaseInterface.php';
+require_once __DIR__ . '/../config/PackageModelInterface.php';
 
-class Package {
+class Package implements PackageModelInterface {
     private $db;
     
     public function __construct(DatabaseInterface $db) {

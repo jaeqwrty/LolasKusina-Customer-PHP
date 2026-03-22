@@ -11,7 +11,6 @@ require_once __DIR__ . '/DatabaseInterface.php';
 
 class Database implements DatabaseInterface {
     private $conn;
-    private static $instance = null;
     
     /**
      * Establish a database connection.
@@ -34,18 +33,6 @@ class Database implements DatabaseInterface {
         
         // NFR-T03: Ensure database session uses Asia/Manila timezone
         $this->conn->query("SET time_zone = '+08:00'");
-    }
-    
-    /**
-     * Get singleton instance of Database.
-     * 
-     * @return Database
-     */
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
     
     /**
