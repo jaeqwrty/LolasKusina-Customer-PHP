@@ -1,97 +1,13 @@
 <?php
 /**
- * Register Page — Minimalist Design
- * Handles user registration with name, phone, and password
+ * Register View — Pure presentation (SRP)
+ * 
+ * Business logic handled by AuthController.
+ * Receives: $error, $redirect, $pageTitle from controller.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}
-
-// Include config
-require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/database.php';
-
-$pageTitle = "Sign Up - Lola's Kusina";
-$redirect = $_GET['redirect'] ?? BASE_PATH . '/index.php';
-
-// Validate redirect URL
-if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
-    $redirect = BASE_PATH . '/index.php';
-}
-
-// Handle form submission
-$error = '';
-$success = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fullName = trim($_POST['full_name'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    $confirmPassword = trim($_POST['confirm_password'] ?? '');
-
-    // Validation
-    if (empty($fullName) || empty($phone) || empty($password) || empty($confirmPassword)) {
-        $error = 'Please fill in all fields.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters long.';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'Passwords do not match.';
-    } else {
-        try {
-            $db = Database::getInstance();
-
-            // Check if phone already exists
-            $existing = $db->execute(
-                "SELECT user_id FROM users WHERE phone_number = ?",
-                [$phone]
-            );
-
-            if (!empty($existing)) {
-                $error = 'This phone number is already registered.';
-            } else {
-                // Split full name into first and last name
-                $nameParts = explode(' ', $fullName, 2);
-                $firstName = $nameParts[0];
-                $lastName = $nameParts[1] ?? '';
-
-                // Hash password
-                $passwordHash = password_hash($password, PASSWORD_BCRYPT);
-
-                // Insert new user
-                $db->execute(
-                    "INSERT INTO users (role, first_name, last_name, phone_number, password_hash, is_active, created_at) 
-                     VALUES (?, ?, ?, ?, ?, 1, NOW())",
-                    ['customer', $firstName, $lastName, $phone, $passwordHash]
-                );
-
-                // Get the newly created user ID
-                $newUser = $db->execute(
-                    "SELECT user_id, first_name, last_name FROM users WHERE phone_number = ?",
-                    [$phone]
-                );
-
-                if (!empty($newUser)) {
-                    $user = $newUser[0];
-                    // Auto-login the user
-                    $_SESSION['user_id'] = $user['user_id'];
-                    $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
-
-                    // Redirect to requested page
-                    header('Location: ' . $redirect);
-                    exit;
-                }
-            }
-        } catch (Exception $e) {
-            $error = 'An error occurred during registration. Please try again later.';
-        }
-    }
-}
-
-// If already logged in, redirect
-if (!empty($_SESSION['user_id'])) {
-    header('Location: ' . $redirect);
-    exit;
 }
 ?>
 <!DOCTYPE html>

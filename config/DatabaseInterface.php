@@ -30,5 +30,14 @@ interface DatabaseInterface {
      * Close the database connection.
      */
     public function close();
+
+    /**
+     * Execute a parameterized query using prepared statements.
+     * 
+     * @param string $sql    SQL query with ? placeholders
+     * @param array  $params Array of parameters to bind
+     * @return array|bool    Array of results for SELECT, true for INSERT/UPDATE/DELETE, false on error
+     */
+    public function execute($sql, $params = []);
 }
 ?>

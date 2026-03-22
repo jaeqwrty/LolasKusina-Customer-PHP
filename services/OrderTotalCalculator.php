@@ -5,8 +5,9 @@
  * Encapsulates all order pricing math in one place.
  * Used by OrderController instead of inline calculations.
  */
+require_once __DIR__ . '/../config/CalculatorInterface.php';
 
-class OrderTotalCalculator {
+class OrderTotalCalculator implements CalculatorInterface {
     
     /**
      * Calculate order totals from cart items and optional modifiers.

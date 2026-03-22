@@ -3,14 +3,14 @@
  * Cart Controller — SRP: manages session-based shopping cart only
  * 
  * Extracted from OrderController so each controller has a single responsibility.
- * DIP: InputValidator is injected via constructor for input sanitization.
+ * DIP: ValidatorInterface is injected via constructor for input sanitization.
  */
-require_once __DIR__ . '/../services/InputValidator.php';
+require_once __DIR__ . '/../config/ValidatorInterface.php';
 
 class CartController {
     private $validator;
     
-    public function __construct(InputValidator $validator) {
+    public function __construct(ValidatorInterface $validator) {
         $this->validator = $validator;
     }
     

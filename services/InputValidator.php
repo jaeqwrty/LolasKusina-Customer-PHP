@@ -5,8 +5,9 @@
  * Reusable validation and sanitization for user input.
  * Used by controllers before processing form data.
  */
+require_once __DIR__ . '/../config/ValidatorInterface.php';
 
-class InputValidator {
+class InputValidator implements ValidatorInterface {
     
     /**
      * Check that all required fields are present and non-empty in the data array.

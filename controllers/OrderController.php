@@ -4,13 +4,13 @@
  * 
  * Cart management has been extracted to CartController.
  * Pricing math has been extracted to OrderTotalCalculator.
- * DIP: Order model, OrderTotalCalculator, and InputValidator are injected via constructor.
+ * DIP: All dependencies are injected as interfaces, not concrete classes.
  */
 require_once __DIR__ . '/../models/Order.php';
-require_once __DIR__ . '/../services/OrderTotalCalculator.php';
-require_once __DIR__ . '/../services/InputValidator.php';
-require_once __DIR__ . '/../services/ReferenceNumberGenerator.php';
-require_once __DIR__ . '/../services/DeliveryFeeCalculator.php';
+require_once __DIR__ . '/../config/CalculatorInterface.php';
+require_once __DIR__ . '/../config/ValidatorInterface.php';
+require_once __DIR__ . '/../config/ReferenceGeneratorInterface.php';
+require_once __DIR__ . '/../config/DeliveryFeeCalculatorInterface.php';
 
 class OrderController {
     private $orderModel;
@@ -21,10 +21,10 @@ class OrderController {
     
     public function __construct(
         Order $orderModel,
-        OrderTotalCalculator $calculator,
-        InputValidator $validator,
-        ReferenceNumberGenerator $referenceGenerator,
-        DeliveryFeeCalculator $deliveryFeeCalculator
+        CalculatorInterface $calculator,
+        ValidatorInterface $validator,
+        ReferenceGeneratorInterface $referenceGenerator,
+        DeliveryFeeCalculatorInterface $deliveryFeeCalculator
     ) {
         $this->orderModel = $orderModel;
         $this->calculator = $calculator;

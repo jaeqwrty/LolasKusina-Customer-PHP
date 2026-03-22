@@ -5,8 +5,9 @@
  * Generates unique alphanumeric reference numbers for order tracking.
  * Format: LK-YYYYMMDD-XXXX (e.g., LK-20260314-A7B2)
  */
+require_once __DIR__ . '/../config/ReferenceGeneratorInterface.php';
 
-class ReferenceNumberGenerator {
+class ReferenceNumberGenerator implements ReferenceGeneratorInterface {
     
     private const PREFIX = 'LK';
     private const RANDOM_LENGTH = 4;

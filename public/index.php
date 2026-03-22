@@ -1,17 +1,16 @@
 <?php
 /**
- * Router — OCP: Registry-based route mapping
+ * Router — OCP: Registry-based route mapping, DIP: ServiceContainer wiring
  * 
  * Routes are defined in a data structure, not a switch statement.
  * To add a new page, add an entry to $routes — no need to edit routing logic.
  * 
- * Controller routes use closures to instantiate and invoke controllers.
+ * Controller routes use closures that receive $container for DI.
  * View-only routes use file paths (string) for direct inclusion.
  */
 session_start();
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../services/InputValidator.php';
+require_once __DIR__ . '/../config/ServiceContainer.php';
 
 // Base path for URL generation (supports subdirectory deployments)
 define('BASE_PATH', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
@@ -37,54 +36,78 @@ if (in_array(strtolower($fileExtension), $staticExtensions)) {
     }
 }
 
-// ===== Shared Dependencies =====
-// Lazy-loaded: only instantiated when a controller route is matched.
-$db = null;
-$validator = null;
-
-function getDb() {
-    global $db;
-    if ($db === null) {
-        $db = new Database();
-    }
-    return $db;
-}
-
-function getValidator() {
-    global $validator;
-    if ($validator === null) {
-        $validator = new InputValidator();
-    }
-    return $validator;
-}
+// ===== DIP: ServiceContainer replaces global helper functions =====
+$container = new ServiceContainer();
 
 // ===== OCP Route Registry =====
 // Controller routes use closures; view-only routes use file path strings.
 // Add new pages here — no need to touch routing logic below.
 $routes = [
     // Homepage: wired through PackageController to load packages from DB
-    '' => function() {
+    '' => function() use ($container) {
         require_once __DIR__ . '/../controllers/PackageController.php';
-        require_once __DIR__ . '/../models/Package.php';
-        $controller = new PackageController(new Package(getDb()));
+        $controller = new PackageController($container->getPackageModel());
         $controller->index();
     },
-    'index.php' => function() {
+    'index.php' => function() use ($container) {
         require_once __DIR__ . '/../controllers/PackageController.php';
-        require_once __DIR__ . '/../models/Package.php';
-        $controller = new PackageController(new Package(getDb()));
+        $controller = new PackageController($container->getPackageModel());
         $controller->index();
     },
-    'login.php'                   => '/../views/login.php',
-    'views/login.php'             => '/../views/login.php',
-    'register.php'                => '/../views/register.php',
-    'views/register.php'          => '/../views/register.php',
+
+    // Auth — SRP: controllers handle business logic, views are pure presentation
+    'login.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/AuthController.php';
+        $controller = new AuthController($container->getUserModel(), $container->getValidator());
+        $controller->login();
+    },
+    'views/login.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/AuthController.php';
+        $controller = new AuthController($container->getUserModel(), $container->getValidator());
+        $controller->login();
+    },
+    'register.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/AuthController.php';
+        $controller = new AuthController($container->getUserModel(), $container->getValidator());
+        $controller->register();
+    },
+    'views/register.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/AuthController.php';
+        $controller = new AuthController($container->getUserModel(), $container->getValidator());
+        $controller->register();
+    },
+
+    // Profile — SRP: controller handles data + auth guard, view is pure presentation
+    'profile.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/ProfileController.php';
+        $controller = new ProfileController($container->getUserModel());
+        $controller->show();
+    },
+    'views/profile.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/ProfileController.php';
+        $controller = new ProfileController($container->getUserModel());
+        $controller->show();
+    },
+
+    // Package details — SRP: controller handles data loading + fallbacks
+    'package_details.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/PackageDetailsController.php';
+        $packageId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $controller = new PackageDetailsController($container->getPackageModel());
+        $controller->show($packageId);
+    },
+    'views/package_details.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/PackageDetailsController.php';
+        $packageId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $controller = new PackageDetailsController($container->getPackageModel());
+        $controller->show($packageId);
+    },
+
+    // Other view-only routes (no SRP violation — these are simple includes)
     'forgot_password.php'         => '/../views/forgot_password.php',
     'views/forgot_password.php'   => '/../views/forgot_password.php',
     'order_details.php'           => '/../views/order_details.php',
     'views/order_details.php'     => '/../views/order_details.php',
-    'package_details.php'         => '/../views/package_details.php',
-    'views/package_details.php'   => '/../views/package_details.php',
 
     // Build your own package
     'build_package.php'           => '/../views/build_package.php',
@@ -98,10 +121,6 @@ $routes = [
     'order_confirmation.php'      => '/../views/order_confirmation.php',
     'views/order_confirmation.php'=> '/../views/order_confirmation.php',
 
-    // Order details
-    'order_details.php'           => '/../views/order_details.php',
-    'views/order_details.php'     => '/../views/order_details.php',
-
     // Order history
     'order_history.php'           => '/../views/order_history.php',
     'views/order_history.php'     => '/../views/order_history.php',
@@ -114,9 +133,7 @@ $routes = [
     'review_success.php'          => '/../views/review_success.php',
     'views/review_success.php'    => '/../views/review_success.php',
 
-    // Profile & Auth
-    'profile.php'                 => '/../views/profile.php',
-    'views/profile.php'           => '/../views/profile.php',
+    // Auth pages (no business logic in view)
     'logout.php'                  => '/../views/logout.php',
     'views/logout.php'            => '/../views/logout.php',
     'auth_gate.php'               => '/../views/auth_gate.php',

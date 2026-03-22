@@ -7,8 +7,9 @@
  * - Maximum file size (2MB per NFR-P05)
  * - Safe file extension
  */
+require_once __DIR__ . '/../config/FileUploadValidatorInterface.php';
 
-class FileUploadValidator {
+class FileUploadValidator implements FileUploadValidatorInterface {
     
     /** Maximum upload size in bytes (2MB per NFR-P05). */
     private const MAX_SIZE_BYTES = 2 * 1024 * 1024;

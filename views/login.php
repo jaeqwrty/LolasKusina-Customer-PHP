@@ -1,75 +1,13 @@
 <?php
 /**
- * Login Page — Minimalist Design
- * Handles user authentication with mobile number and password
+ * Login View — Pure presentation (SRP)
+ * 
+ * Business logic handled by AuthController.
+ * Receives: $error, $redirect, $pageTitle from controller.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}
-
-// Include config
-require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/database.php';
-
-$pageTitle = "Log In - Lola's Kusina";
-$redirect = $_GET['redirect'] ?? BASE_PATH . '/index.php';
-
-// Validate redirect URL
-if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
-    $redirect = BASE_PATH . '/index.php';
-}
-
-// Handle form submission
-$error = '';
-$success = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $phone = trim($_POST['phone'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-
-    if (empty($phone) || empty($password)) {
-        $error = 'Please fill in all fields.';
-    } else {
-        try {
-            $db = Database::getInstance();
-            $result = $db->execute(
-                "SELECT user_id, first_name, last_name, password_hash FROM users WHERE phone_number = ? AND is_active = 1",
-                [$phone]
-            );
-
-            if (!empty($result)) {
-                $user = $result[0];
-                if (password_verify($password, $user['password_hash'])) {
-                    // Login successful
-                    $_SESSION['user_id'] = $user['user_id'];
-                    $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
-
-                    // Update last login
-                    $db->execute(
-                        "UPDATE users SET last_login_at = NOW() WHERE user_id = ?",
-                        [$user['user_id']]
-                    );
-
-                    // Redirect to requested page
-                    header('Location: ' . $redirect);
-                    exit;
-                } else {
-                    $error = 'Invalid phone number or password.';
-                }
-            } else {
-                $error = 'Invalid phone number or password.';
-            }
-        } catch (Exception $e) {
-            $error = 'An error occurred. Please try again later.';
-        }
-    }
-}
-
-// If already logged in, redirect
-if (!empty($_SESSION['user_id'])) {
-    header('Location: ' . $redirect);
-    exit;
 }
 ?>
 <!DOCTYPE html>

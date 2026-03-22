@@ -8,8 +8,9 @@
  * Currently returns a flat fee. When Google Maps Distance Matrix API
  * is integrated, the distance parameter will come from the API response.
  */
+require_once __DIR__ . '/../config/DeliveryFeeCalculatorInterface.php';
 
-class DeliveryFeeCalculator {
+class DeliveryFeeCalculator implements DeliveryFeeCalculatorInterface {
     
     /** Base fee for deliveries within the base distance (in PHP). */
     private const BASE_FEE = 100.00;

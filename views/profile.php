@@ -1,95 +1,11 @@
 <?php
-// Auth guard — redirect unauthenticated users to the auth gate
-require_once __DIR__ . '/../config/auth.php';
-requireAuth('/profile.php');
-
-require_once __DIR__ . '/../config/database.php';
-
-$pageTitle = "My Profile - Lola's Kusina";
-$currentPage = "account";
-
-$db     = Database::getInstance();
-$userId = (int)$_SESSION['user_id'];
-
-// Fetch authenticated user from DB
-$userResult = $db->execute(
-    "SELECT user_id, first_name, last_name, email, phone_number FROM users WHERE user_id = ? AND is_active = 1",
-    [$userId]
-);
-if (empty($userResult)) {
-    $_SESSION = [];
-    session_destroy();
-    header('Location: ' . BASE_PATH . '/auth_gate.php');
-    exit;
-}
-$userData      = $userResult[0];
-$fullName      = trim($userData['first_name'] . ' ' . $userData['last_name']);
-$phone         = $userData['phone_number'];
-$email         = $userData['email'] ?? '';
-$avatarInitial = strtoupper(substr($userData['first_name'], 0, 1));
-
-// Handle profile update — POST/Redirect/GET to prevent re-submission
-$updateError = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_profile') {
-    $newName  = trim($_POST['full_name'] ?? '');
-    $newPhone = trim($_POST['phone']     ?? '');
-    $newEmail = trim($_POST['email']     ?? '');
-
-    if (empty($newName) || empty($newPhone)) {
-        $updateError = 'Full name and phone number are required.';
-    } else {
-        $phoneCheck = $db->execute(
-            "SELECT user_id FROM users WHERE phone_number = ? AND user_id != ?",
-            [$newPhone, $userId]
-        );
-        if (!empty($phoneCheck)) {
-            $updateError = 'That phone number is already used by another account.';
-        } else {
-            $nameParts = explode(' ', $newName, 2);
-            $db->execute(
-                "UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, email = ?, updated_at = NOW() WHERE user_id = ?",
-                [$nameParts[0], $nameParts[1] ?? '', $newPhone, $newEmail ?: null, $userId]
-            );
-            $_SESSION['user_name'] = $newName;
-            header('Location: ' . BASE_PATH . '/profile.php?updated=1');
-            exit;
-        }
-    }
-    // Keep submitted values visible in the re-opened modal on error
-    $fullName      = $newName;
-    $phone         = $newPhone;
-    $email         = $newEmail;
-    $avatarInitial = strtoupper(substr(trim(explode(' ', $newName)[0] ?? 'U'), 0, 1));
-}
-
-// Fetch user's real orders (matches lolas_kusina_db schema)
-$ordersResult = $db->execute(
-    "SELECT o.order_id, o.reference_number, o.created_at, o.status,
-            op.grand_total,
-            (SELECT mi.name FROM order_items oi
-             JOIN menu_items mi ON mi.item_id = oi.item_id
-             WHERE oi.order_id = o.order_id
-             ORDER BY oi.order_item_id ASC LIMIT 1) AS first_item
-     FROM orders o
-     LEFT JOIN order_payments op ON op.order_id = o.order_id
-     WHERE o.customer_id = ?
-     ORDER BY o.created_at DESC",
-    [$userId]
-);
-$orders = array_map(fn($o) => [
-    'ref'    => $o['reference_number'] ?? ('PH-' . str_pad($o['order_id'], 5, '0', STR_PAD_LEFT)),
-    'date'   => date('M j, Y • g:i A', strtotime($o['created_at'])),
-    'name'   => $o['first_item'] ?? ('Order #' . $o['order_id']),
-    'price'  => (float)($o['grand_total'] ?? 0),
-    'status' => match($o['status']) {
-        'Completed' => 'Delivered',
-        'Cancelled', 'Rejected' => 'Cancelled',
-        default => 'Ongoing',
-    },
-    'id'     => $o['order_id'],
-], is_array($ordersResult) ? $ordersResult : []);
-
-include __DIR__ . '/layouts/header.php';
+/**
+ * Profile View — Pure presentation (SRP)
+ * 
+ * Business logic handled by ProfileController.
+ * Receives: $fullName, $phone, $email, $avatarInitial, $orders,
+ *           $updateError, $pageTitle, $currentPage from controller.
+ */
 ?>
 
 <div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-2xl mb-20 md:mb-8">
