@@ -11,3 +11,6 @@ Thumbs.db
 
 # Dependencies
 /vendor/
+
+# Local API secrets
+config/google_matrix.local.php

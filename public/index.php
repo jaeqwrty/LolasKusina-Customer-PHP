@@ -89,6 +89,18 @@ $routes = [
         $controller->show();
     },
 
+    // Backoffice dashboards
+    'admin/dashboard.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/DashboardController.php';
+        $controller = new DashboardController($container->getUserModel(), $container->getDashboardModel(), $container->getAuthGuard());
+        $controller->admin();
+    },
+    'reseller/dashboard.php' => function() use ($container) {
+        require_once __DIR__ . '/../controllers/DashboardController.php';
+        $controller = new DashboardController($container->getUserModel(), $container->getDashboardModel(), $container->getAuthGuard());
+        $controller->reseller();
+    },
+
     // Package details — SRP: controller handles data loading + fallbacks
     'package_details.php' => function() use ($container) {
         require_once __DIR__ . '/../controllers/PackageDetailsController.php';

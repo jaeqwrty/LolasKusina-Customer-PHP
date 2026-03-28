@@ -51,8 +51,13 @@ class AuthController {
                     if ($user && password_verify($password, $user['password_hash'])) {
                         // Login successful
                         $_SESSION['user_id'] = $user['user_id'];
+                        $_SESSION['user_role'] = $user['role'] ?? 'customer';
                         $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
                         $this->userModel->updateLastLogin($user['user_id']);
+
+                        if (!isset($_GET['redirect']) || empty($_GET['redirect'])) {
+                            $redirect = $this->getDefaultRedirectByRole($_SESSION['user_role']);
+                        }
                         
                         header('Location: ' . $redirect);
                         exit;
@@ -117,6 +122,7 @@ class AuthController {
                         if ($newUser) {
                             // Auto-login the user
                             $_SESSION['user_id'] = $newUser['user_id'];
+                            $_SESSION['user_role'] = 'customer';
                             $_SESSION['user_name'] = $newUser['first_name'] . ' ' . $newUser['last_name'];
                             
                             header('Location: ' . $redirect);
@@ -131,6 +137,14 @@ class AuthController {
         
         $pageTitle = "Sign Up - Lola's Kusina";
         include __DIR__ . '/../views/register.php';
+    }
+
+    private function getDefaultRedirectByRole(string $role): string {
+        return match ($role) {
+            'admin' => BASE_PATH . '/admin/dashboard.php',
+            'reseller' => BASE_PATH . '/reseller/dashboard.php',
+            default => BASE_PATH . '/index.php',
+        };
     }
 }
 ?>

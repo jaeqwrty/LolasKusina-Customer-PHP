@@ -24,7 +24,7 @@ class User implements UserModelInterface {
      */
     public function findByPhone(string $phone): ?array {
         $result = $this->db->execute(
-            "SELECT user_id, first_name, last_name, password_hash FROM users WHERE phone_number = ? AND is_active = 1",
+            "SELECT user_id, role, first_name, last_name, password_hash FROM users WHERE phone_number = ? AND is_active = 1",
             [$phone]
         );
         return !empty($result) ? $result[0] : null;
@@ -38,7 +38,7 @@ class User implements UserModelInterface {
      */
     public function findById(int $userId): ?array {
         $result = $this->db->execute(
-            "SELECT user_id, first_name, last_name, email, phone_number FROM users WHERE user_id = ? AND is_active = 1",
+            "SELECT user_id, role, first_name, last_name, email, phone_number FROM users WHERE user_id = ? AND is_active = 1",
             [$userId]
         );
         return !empty($result) ? $result[0] : null;

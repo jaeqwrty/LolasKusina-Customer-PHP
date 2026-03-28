@@ -23,7 +23,7 @@ define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'lolas_kusina');
-define('DB_PORT', $_ENV['DB_PORT'] ?? 3307);
+define('DB_PORT', $_ENV['DB_PORT'] ?? 3306);
 
 // Application settings
 define('APP_NAME', $_ENV['APP_NAME'] ?? "Lola's Kusina");

@@ -17,6 +17,7 @@ require_once __DIR__ . '/UserModelInterface.php';
 require_once __DIR__ . '/OrderModelInterface.php';
 require_once __DIR__ . '/PackageModelInterface.php';
 require_once __DIR__ . '/MenuItemModelInterface.php';
+require_once __DIR__ . '/DashboardModelInterface.php';
 require_once __DIR__ . '/AuthGuard.php';
 
 class ServiceContainer {
@@ -148,6 +149,19 @@ class ServiceContainer {
             $this->instances['menuItem'] = new MenuItem($this->getDatabase());
         }
         return $this->instances['menuItem'];
+    }
+
+    /**
+     * Get the Dashboard model instance.
+     *
+     * @return DashboardModelInterface
+     */
+    public function getDashboardModel(): DashboardModelInterface {
+        if (!isset($this->instances['dashboard'])) {
+            require_once __DIR__ . '/../models/Dashboard.php';
+            $this->instances['dashboard'] = new Dashboard($this->getDatabase());
+        }
+        return $this->instances['dashboard'];
     }
 }
 ?>
