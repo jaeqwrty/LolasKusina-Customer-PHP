@@ -10,12 +10,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Include config
 require_once __DIR__ . '/../config/app.php';
+require_once __DIR__ . '/helpers/view_helpers.php';
 
 $pageTitle = "Forgot Password - Lola's Kusina";
 
 // If already logged in, redirect home
 if (!empty($_SESSION['user_id'])) {
-    header('Location: ' . BASE_PATH . '/index.php');
+    header('Location: ' . getHomePath());
     exit;
 }
 ?>

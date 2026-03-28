@@ -31,5 +31,5 @@ if ($uri !== '/' && is_file($publicFile)) {
     return true;
 }
 
-// Route all other requests through the public router
-require __DIR__ . '/public/index.php';
+// Route all other requests through the public app router
+require __DIR__ . '/public/app_router.php';

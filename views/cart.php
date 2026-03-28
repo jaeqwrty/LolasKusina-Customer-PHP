@@ -1,8 +1,20 @@
 <?php
 // Cart / Multi-Step Checkout View
+require_once __DIR__ . '/../config/google_matrix.php';
+
 $pageTitle = "My Cart";
 $currentPage = "order";
 $cartCount = count($_SESSION['cart'] ?? []);
+$matrixConfig = getGoogleMatrixConfig();
+$storeAddress = (string) ($matrixConfig['store_address'] ?? '');
+$storeMapUrl = (string) ($matrixConfig['store_map_url'] ?? 'https://www.google.com/maps');
+
+$storeLat = 7.4471598;
+$storeLng = 125.823198;
+if (preg_match('/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/', $storeAddress, $coordMatches)) {
+    $storeLat = (float) $coordMatches[1];
+    $storeLng = (float) $coordMatches[2];
+}
 
 // Sample cart items (replace with session data)
 $cartItems = [
@@ -31,6 +43,8 @@ foreach ($cartItems as $item) {
 
 include __DIR__ . '/layouts/header.php';
 ?>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
 <style>
     /* Step progress bar */
@@ -65,11 +79,73 @@ include __DIR__ . '/layouts/header.php';
     
     /* Schedule selectors */
     .schedule-option { cursor: pointer; transition: all 0.2s; }
-    .schedule-option.selected { background: #FF6B35; color: white; }
-    .schedule-option.selected .schedule-sub { color: rgba(255,255,255,0.8); }
+    .schedule-pill {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #ffffff;
+        padding: 0.6rem 0.7rem;
+        text-align: left;
+    }
+    .schedule-option.selected.schedule-pill {
+        background: #FFF7ED;
+        border-color: #FF6B35;
+        color: #C2410C;
+    }
+    .schedule-option.selected .schedule-sub { color: #EA580C; }
+    .schedule-shell {
+        border: 1px solid #F1F5F9;
+        background: #F8FAFC;
+        border-radius: 0.9rem;
+        padding: 0.75rem;
+    }
+
+    /* Interactive maps */
+    .checkout-map {
+        height: 220px;
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    /* Compact layout tuning for the order flow */
+    .order-flow-compact .checkout-step .bg-white.rounded-2xl {
+        border-radius: 1rem;
+    }
+
+    .order-flow-compact .checkout-step .p-4 {
+        padding: 0.9rem;
+    }
+
+    .order-flow-compact .checkout-step .mb-4 {
+        margin-bottom: 0.75rem;
+    }
+
+    .order-flow-compact .checkout-step .mb-6 {
+        margin-bottom: 1rem;
+    }
+
+    .order-flow-compact .checkout-step .py-4 {
+        padding-top: 0.8rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .order-flow-compact .checkout-step .text-xl {
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+    }
+
+    .order-flow-compact .checkout-step .text-lg {
+        font-size: 1rem;
+        line-height: 1.35rem;
+    }
+
+    .order-flow-compact .checkout-step .text-sm {
+        line-height: 1.3rem;
+    }
 </style>
 
-<div class="container mx-auto px-4 md:px-8 py-4 max-w-md md:max-w-2xl mb-20 md:mb-8">
+<div class="order-flow-compact container mx-auto px-4 md:px-6 py-3 max-w-md md:max-w-4xl mb-20 md:mb-8">
     
     <!-- ==================== TOP NAV ==================== -->
     <div class="flex items-center justify-between mb-2">
@@ -88,62 +164,68 @@ include __DIR__ . '/layouts/header.php';
     <!-- ==================== STEP 0: VIEW CART ==================== -->
     <div id="step0" class="checkout-step active">
         <h2 class="text-xl font-bold text-primary leading-tight mb-1">My Cart</h2>
-        <p class="text-sm text-gray-500 mb-6">Review your items before checkout</p>
+        <p class="text-sm text-gray-500 mb-4">Review your items before checkout</p>
 
-        <!-- Cart Items -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
-            <div id="cartItemsList">
-                <?php foreach ($cartItems as $item): ?>
-                <div class="review-item">
-                    <div class="w-14 h-14 rounded-lg bg-orange-50 overflow-hidden shrink-0">
-                        <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($item['name']); ?></h4>
-                        <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($item['description']); ?></p>
-                    </div>
-                    <div class="flex flex-col items-end gap-2">
-                        <span class="font-bold text-gray-800 text-sm whitespace-nowrap">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
-                        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-2 py-1">
-                            <button onclick="updateQuantity(<?php echo $item['id']; ?>, -1)" class="text-gray-600 hover:text-gray-800">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
-                            </button>
-                            <span class="text-xs font-semibold text-gray-800 min-w-[1.5rem] text-center">x<?php echo $item['quantity']; ?></span>
-                            <button onclick="updateQuantity(<?php echo $item['id']; ?>, 1)" class="text-gray-600 hover:text-gray-800">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            </button>
+        <div class="md:grid md:grid-cols-[1.6fr_1fr] md:gap-4">
+            <div>
+                <!-- Cart Items -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
+                    <div id="cartItemsList">
+                        <?php foreach ($cartItems as $item): ?>
+                        <div class="review-item">
+                            <div class="w-14 h-14 rounded-lg bg-orange-50 overflow-hidden shrink-0">
+                                <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($item['name']); ?></h4>
+                                <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($item['description']); ?></p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="font-bold text-gray-800 text-sm whitespace-nowrap">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
+                                <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-2 py-1">
+                                    <button onclick="updateQuantity(<?php echo $item['id']; ?>, -1)" class="text-gray-600 hover:text-gray-800">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                                    </button>
+                                    <span class="text-xs font-semibold text-gray-800 min-w-[1.5rem] text-center">x<?php echo $item['quantity']; ?></span>
+                                    <button onclick="updateQuantity(<?php echo $item['id']; ?>, 1)" class="text-gray-600 hover:text-gray-800">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-                <?php endforeach; ?>
+            </div>
+
+            <div class="md:sticky md:top-24 self-start">
+                <!-- Cart Summary -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Subtotal</span>
+                        <span id="cartSubtotal" class="font-semibold text-gray-800">₱<?php echo number_format($subtotal, 2); ?></span>
+                    </div>
+                    <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between items-center">
+                        <span class="font-bold text-gray-800">Subtotal</span>
+                        <span id="cartTotal" class="font-bold text-primary text-lg">₱<?php echo number_format($subtotal, 2); ?></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-2.5">
+                    <button onclick="goToStep(1)" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-base shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                        PROCEED TO CHECKOUT
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <button onclick="continueShopping()" class="w-full bg-white text-primary py-2.5 rounded-xl font-bold border-2 border-primary hover:bg-orange-50 transition">
+                        CONTINUE SHOPPING
+                    </button>
+                </div>
+
+                <p class="text-center text-xs text-gray-400 mt-4">May problema sa order? <a href="#" class="text-primary font-semibold">Tumawag sa amin.</a></p>
             </div>
         </div>
-
-        <!-- Cart Summary -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm text-gray-600">Subtotal</span>
-                <span id="cartSubtotal" class="font-semibold text-gray-800">₱<?php echo number_format($subtotal, 2); ?></span>
-            </div>
-            <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between items-center">
-                <span class="font-bold text-gray-800">Subtotal</span>
-                <span id="cartTotal" class="font-bold text-primary text-lg">₱<?php echo number_format($subtotal, 2); ?></span>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="space-y-3">
-            <button onclick="goToStep(1)" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2">
-                PROCEED TO CHECKOUT
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
-            <button onclick="continueShopping()" class="w-full bg-white text-primary py-3 rounded-xl font-bold border-2 border-primary hover:bg-orange-50 transition">
-                CONTINUE SHOPPING
-            </button>
-        </div>
-
-        <p class="text-center text-xs text-gray-400 mt-6">May problema sa order? <a href="#" class="text-primary font-semibold">Tumawag sa amin.</a></p>
     </div>
         <!-- ==================== STEP 1: Delivery or Pickup ==================== -->
     <div id="step1" class="checkout-step">
@@ -209,15 +291,12 @@ include __DIR__ . '/layouts/header.php';
                 <input id="deliveryAddress" type="text" placeholder="123 Rizal Ave, Manila" value="" class="flex-1 text-sm text-gray-800 font-medium bg-transparent border-b border-gray-200 pb-1 focus:outline-none focus:border-primary">
             </div>
             
-            <!-- Map placeholder -->
-            <div class="w-full h-40 bg-gray-100 rounded-xl mb-3 flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50"></div>
-                <div class="relative text-center">
-                    <svg class="w-8 h-8 text-primary mx-auto mb-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                    <p class="text-xs text-gray-500">Map Preview</p>
-                </div>
+            <!-- Interactive delivery map -->
+            <div id="deliveryMap" class="checkout-map mb-3"></div>
+            <div class="text-xs text-gray-500 mb-2">
+                Tap the map to pin the exact delivery location.
             </div>
-            <button class="text-primary text-sm font-semibold hover:underline">Edit Map</button>
+            <a href="<?php echo htmlspecialchars($storeMapUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-primary text-sm font-semibold hover:underline inline-block">Open in Google Maps</a>
         </div>
 
         <!-- Distance & Fee (delivery only) -->
@@ -225,9 +304,10 @@ include __DIR__ . '/layouts/header.php';
             <div class="mb-3">
                 <label class="text-sm text-gray-600 font-medium mb-1 block">Distance (km)</label>
                 <div class="flex items-center gap-2">
-                    <input id="distanceInput" type="number" placeholder="Enter distance" min="0" step="0.1" value="0" class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" oninput="calculateDeliveryFee()">
+                    <input id="distanceInput" type="text" value="0.00" readonly class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none">
                     <span class="text-sm text-gray-600 font-medium whitespace-nowrap">km</span>
                 </div>
+                <button type="button" onclick="calculateDeliveryFee()" class="mt-2 text-primary text-sm font-semibold hover:underline">Calculate from address</button>
             </div>
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
@@ -236,32 +316,37 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <span class="font-bold text-primary text-lg">₱<span id="deliveryFeeAmount">0.00</span></span>
             </div>
-            <p class="text-xs text-gray-400 mt-2">₱12 per kilometer</p>
+            <p id="deliveryFeeMeta" class="text-xs text-gray-400 mt-2">Fee will be computed via Google Maps distance.</p>
         </div>
 
         <!-- Schedule Delivery -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="font-semibold text-gray-800 mb-4">Schedule Delivery</h3>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Date -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">DATE</label>
-                    <div class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleDate(this, 'today')">
-                        <div class="font-bold text-sm">Today</div>
-                        <div class="schedule-sub text-xs text-gray-500"><?php echo date('M d, Y'); ?></div>
-                    </div>
-                    <input type="date" id="customDate" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
-                </div>
-                <!-- Time -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <div class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectScheduleTime(this, 'asap')">
-                        <div class="font-bold text-sm flex items-center justify-center gap-1">ASAP <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
-                        <div class="schedule-sub text-xs text-gray-500">~ 45 mins</div>
-                    </div>
-                    <input type="time" id="customTime" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+            <h3 class="font-semibold text-gray-800 mb-3">Schedule Delivery</h3>
+            <div class="schedule-shell mb-3">
+                <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide mb-2">Quick Date</p>
+                <div class="grid grid-cols-2 gap-2" id="deliveryDateQuick">
+                    <button type="button" id="deliveryDateToday" class="schedule-option schedule-pill selected" onclick="selectScheduleDate(this, 'today')">
+                        <p class="text-sm font-bold">Today</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y'); ?></p>
+                    </button>
+                    <button type="button" id="deliveryDateTomorrow" class="schedule-option schedule-pill" onclick="selectScheduleDate(this, 'tomorrow')">
+                        <p class="text-sm font-bold">Tomorrow</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y', strtotime('+1 day')); ?></p>
+                    </button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Delivery Date</label>
+                    <input type="date" id="customDate" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Delivery Time</label>
+                    <input type="time" id="customTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" step="300">
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-3">Schedule must be later than the current time.</p>
 
             <!-- Note to rider -->
             <div>
@@ -296,17 +381,12 @@ include __DIR__ . '/layouts/header.php';
                 </div>
                 <div>
                     <p class="font-semibold text-gray-800">Lola's Kusina Store</p>
-                    <p class="text-xs text-gray-500">123 Maligaya St., Quezon City, Metro Manila</p>
+                    <p class="text-xs text-gray-500"><?php echo htmlspecialchars($storeAddress, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
             </div>
-            <!-- Map placeholder -->
-            <div class="w-full h-40 bg-gray-100 rounded-xl mb-3 flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50"></div>
-                <div class="relative text-center">
-                    <svg class="w-8 h-8 text-primary mx-auto mb-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                    <p class="text-xs text-gray-500">Store Location</p>
-                </div>
-            </div>
+            <!-- Interactive pickup map -->
+            <div id="pickupMap" class="checkout-map mb-3"></div>
+            <a href="<?php echo htmlspecialchars($storeMapUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-primary text-sm font-semibold hover:underline inline-block mb-2">Open in Google Maps</a>
             <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-3">
                 <svg class="w-4 h-4 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                 <span class="text-xs text-green-700 font-semibold">Walang delivery fee — FREE pickup!</span>
@@ -315,27 +395,32 @@ include __DIR__ . '/layouts/header.php';
 
         <!-- Schedule Pickup -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <h3 class="font-semibold text-gray-800 mb-4">Schedule Pickup</h3>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Date -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">DATE</label>
-                    <div id="pickupDateToday" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectPickupDate(this, 'today')">
-                        <div class="font-bold text-sm">Today</div>
-                        <div class="schedule-sub text-xs text-gray-500"><?php echo date('M d, Y'); ?></div>
-                    </div>
-                    <input type="date" id="pickupCustomDate" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
-                </div>
-                <!-- Time -->
-                <div>
-                    <label class="text-xs text-gray-500 font-medium mb-1 block">TIME</label>
-                    <div id="pickupTimeASAP" class="schedule-option selected bg-gray-100 rounded-xl p-3 text-center" onclick="selectPickupTime(this, 'asap')">
-                        <div class="font-bold text-sm flex items-center justify-center gap-1">ASAP <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></div>
-                        <div class="schedule-sub text-xs text-gray-500">~ 30 mins</div>
-                    </div>
-                    <input type="time" id="pickupCustomTime" class="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+            <h3 class="font-semibold text-gray-800 mb-3">Schedule Pickup</h3>
+            <div class="schedule-shell mb-3">
+                <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide mb-2">Quick Date</p>
+                <div class="grid grid-cols-2 gap-2" id="pickupDateQuick">
+                    <button type="button" id="pickupDateToday" class="schedule-option schedule-pill selected" onclick="selectPickupDate(this, 'today')">
+                        <p class="text-sm font-bold">Today</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y'); ?></p>
+                    </button>
+                    <button type="button" id="pickupDateTomorrow" class="schedule-option schedule-pill" onclick="selectPickupDate(this, 'tomorrow')">
+                        <p class="text-sm font-bold">Tomorrow</p>
+                        <p class="schedule-sub text-[11px] text-gray-500"><?php echo date('M d, Y', strtotime('+1 day')); ?></p>
+                    </button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Pickup Date</label>
+                    <input type="date" id="pickupCustomDate" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" min="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 font-medium mb-1 block">Pickup Time</label>
+                    <input type="time" id="pickupCustomTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" step="300">
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-3">Schedule must be later than the current time.</p>
             <!-- Note -->
             <div>
                 <label class="text-xs text-gray-500 font-medium mb-1 block">Note to store (optional)</label>
@@ -533,32 +618,141 @@ include __DIR__ . '/layouts/header.php';
 
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 // ===== State =====
 let currentStep = 0; // Start at cart view (step 0)
 let orderMethod = 'delivery'; // 'delivery' or 'pickup'
 let deliveryFee = 0;
+let distanceKm = 0;
+let deliveryMap = null;
+let pickupMap = null;
+let deliveryMarker = null;
+let selectedDeliveryCoordinates = '';
 const subtotal = <?php echo $subtotal; ?>;
-const DELIVERY_RATE = 12; // 12 pesos per kilometer
+const STORE_ADDRESS = <?php echo json_encode($storeAddress, JSON_UNESCAPED_UNICODE); ?>;
+const STORE_LAT = <?php echo json_encode($storeLat); ?>;
+const STORE_LNG = <?php echo json_encode($storeLng); ?>;
+const DELIVERY_FEE_API = (BASE_PATH || '') + '/api/delivery-fee';
+const REVERSE_GEOCODE_API = (BASE_PATH || '') + '/api/reverse-geocode';
 
-// Calculate delivery fee based on distance
-function calculateDeliveryFee() {
-    const distanceInput = document.getElementById('distanceInput');
-    const distance = parseFloat(distanceInput.value) || 0;
-    
-    if (distance < 0) {
-        distanceInput.value = 0;
+function initMaps() {
+    if (typeof L === 'undefined') return;
+
+    if (!deliveryMap) {
+        deliveryMap = L.map('deliveryMap').setView([STORE_LAT, STORE_LNG], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(deliveryMap);
+
+        const storePin = L.marker([STORE_LAT, STORE_LNG]).addTo(deliveryMap);
+        storePin.bindPopup('Lola\'s Kusina (Store)').openPopup();
+
+        deliveryMap.on('click', function (event) {
+            const lat = Number(event.latlng.lat).toFixed(6);
+            const lng = Number(event.latlng.lng).toFixed(6);
+            selectedDeliveryCoordinates = lat + ',' + lng;
+
+            if (deliveryMarker) {
+                deliveryMap.removeLayer(deliveryMarker);
+            }
+            deliveryMarker = L.marker([lat, lng]).addTo(deliveryMap);
+            deliveryMarker.bindPopup('Pinned delivery location').openPopup();
+
+            document.getElementById('deliveryAddress').value = 'Loading address...';
+            reverseGeocodeAndPopulateAddress(lat, lng);
+            calculateDeliveryFee();
+        });
+    }
+
+    if (!pickupMap) {
+        pickupMap = L.map('pickupMap').setView([STORE_LAT, STORE_LNG], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(pickupMap);
+
+        const marker = L.marker([STORE_LAT, STORE_LNG]).addTo(pickupMap);
+        marker.bindPopup('Lola\'s Kusina (Pickup Location)').openPopup();
+    }
+}
+
+function ensureMapLayout() {
+    if (deliveryMap) deliveryMap.invalidateSize();
+    if (pickupMap) pickupMap.invalidateSize();
+}
+
+async function reverseGeocodeAndPopulateAddress(lat, lng) {
+    const addressInput = document.getElementById('deliveryAddress');
+
+    try {
+        const response = await fetch(REVERSE_GEOCODE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams({ lat: String(lat), lng: String(lng) }).toString(),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+            throw new Error(payload.message || 'Unable to convert pin location into address.');
+        }
+
+        addressInput.value = payload.data.address || selectedDeliveryCoordinates;
+    } catch (error) {
+        addressInput.value = selectedDeliveryCoordinates;
+        showToast(error.message || 'Could not fetch address for pinned location.');
+    }
+}
+
+// Calculate delivery fee via backend Google Matrix endpoint
+async function calculateDeliveryFee() {
+    const addressInput = document.getElementById('deliveryAddress');
+    const destination = selectedDeliveryCoordinates || (addressInput.value || '').trim();
+    const feeMeta = document.getElementById('deliveryFeeMeta');
+
+    if (!destination) {
+        showToast('Please enter a delivery address first.');
+        addressInput.focus();
         return;
     }
-    
-    deliveryFee = distance * DELIVERY_RATE;
-    
-    // Update display
-    document.getElementById('deliveryFeeAmount').textContent = deliveryFee.toLocaleString('en-PH', { minimumFractionDigits: 2 });
-    
-    // Update step 3 and 4 if they're visible
-    if (currentStep === 3) populateStep3();
-    if (currentStep === 4) populateReview();
+
+    feeMeta.textContent = 'Calculating fee...';
+
+    try {
+        const response = await fetch(DELIVERY_FEE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams({ destination }).toString(),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+            throw new Error(payload.message || 'Unable to calculate delivery fee.');
+        }
+
+        const data = payload.data;
+        distanceKm = Number(data.distance_km || 0);
+        deliveryFee = Number(data.delivery_fee || 0);
+
+        document.getElementById('distanceInput').value = distanceKm.toFixed(2);
+        document.getElementById('deliveryFeeAmount').textContent = deliveryFee.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        feeMeta.textContent = 'Distance: ' + (data.distance_text || (distanceKm.toFixed(2) + ' km')) + ' • ETA: ' + (data.duration_text || 'N/A');
+
+        if (currentStep === 3) populateStep3();
+        if (currentStep === 4) populateReview();
+    } catch (error) {
+        distanceKm = 0;
+        deliveryFee = 0;
+        document.getElementById('distanceInput').value = '0.00';
+        document.getElementById('deliveryFeeAmount').textContent = '0.00';
+        feeMeta.textContent = 'Fee calculation unavailable. Please verify address and try again.';
+        showToast(error.message || 'Unable to calculate delivery fee.');
+    }
 }
 
 // Map step number to the correct div ID based on current method
@@ -592,6 +786,10 @@ function goToStep(step) {
     if (step === 3) populateStep3();
     if (step === 4) populateReview();
 
+    if (step === 2) {
+        setTimeout(ensureMapLayout, 120);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -611,15 +809,62 @@ function validateStep(step) {
     if (step === 0) return true; // Cart view - no validation
     if (step === 2 && orderMethod === 'delivery') {
         const address = document.getElementById('deliveryAddress').value.trim();
+        const selectedDate = document.getElementById('customDate').value;
+        const selectedTime = document.getElementById('customTime').value;
         if (!address) {
             showToast('Please enter a delivery address');
             document.getElementById('deliveryAddress').focus();
             return false;
         }
-        const distance = parseFloat(document.getElementById('distanceInput').value) || 0;
-        if (distance <= 0) {
-            showToast('Please enter a valid distance');
-            document.getElementById('distanceInput').focus();
+        if (deliveryFee <= 0 || distanceKm <= 0) {
+            showToast('Please calculate delivery fee first.');
+            return false;
+        }
+        if (!selectedDate) {
+            showToast('Please select a delivery date.');
+            document.getElementById('customDate').focus();
+            return false;
+        }
+        if (!selectedTime) {
+            showToast('Please select a delivery time.');
+            document.getElementById('customTime').focus();
+            return false;
+        }
+
+        const scheduledAt = new Date(selectedDate + 'T' + selectedTime + ':00');
+        if (Number.isNaN(scheduledAt.getTime())) {
+            showToast('Invalid delivery date/time.');
+            return false;
+        }
+
+        if (scheduledAt <= new Date()) {
+            showToast('Delivery schedule must be later than the current date/time.');
+            return false;
+        }
+    }
+    if (step === 2 && orderMethod === 'pickup') {
+        const selectedDate = document.getElementById('pickupCustomDate').value;
+        const selectedTime = document.getElementById('pickupCustomTime').value;
+
+        if (!selectedDate) {
+            showToast('Please select a pickup date.');
+            document.getElementById('pickupCustomDate').focus();
+            return false;
+        }
+        if (!selectedTime) {
+            showToast('Please select a pickup time.');
+            document.getElementById('pickupCustomTime').focus();
+            return false;
+        }
+
+        const scheduledAt = new Date(selectedDate + 'T' + selectedTime + ':00');
+        if (Number.isNaN(scheduledAt.getTime())) {
+            showToast('Invalid pickup date/time.');
+            return false;
+        }
+
+        if (scheduledAt <= new Date()) {
+            showToast('Pickup schedule must be later than the current date/time.');
             return false;
         }
     }
@@ -637,8 +882,13 @@ function selectMethod(method) {
     orderMethod = method;
     if (method === 'pickup') {
         deliveryFee = 0;
+        distanceKm = 0;
+        selectedDeliveryCoordinates = '';
+        document.getElementById('distanceInput').value = '0.00';
+        document.getElementById('deliveryFeeAmount').textContent = '0.00';
+        document.getElementById('deliveryFeeMeta').textContent = 'No delivery fee for pickup.';
     } else {
-        // Reset distance input for delivery
+        document.getElementById('deliveryFeeMeta').textContent = 'Fee will be computed via Google Maps distance.';
         calculateDeliveryFee();
     }
 
@@ -656,30 +906,77 @@ function updateQuantity(itemId, change) {
     showToast('Quantity updated. (Session sync coming soon)');
 }
 
-// ===== Step 2: Delivery schedule helpers =====
-function selectScheduleDate(el, type) {
-    el.classList.add('selected');
+function getLocalDateString(offsetDays = 0) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offsetDays);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return date.getFullYear() + '-' + month + '-' + day;
 }
 
-function selectScheduleTime(el, type) {
-    el.classList.add('selected');
+function updateQuickDateState(inputId, todayId, tomorrowId) {
+    const input = document.getElementById(inputId);
+    const todayChip = document.getElementById(todayId);
+    const tomorrowChip = document.getElementById(tomorrowId);
+    if (!input || !todayChip || !tomorrowChip) return;
+
+    const today = getLocalDateString(0);
+    const tomorrow = getLocalDateString(1);
+    todayChip.classList.toggle('selected', input.value === today);
+    tomorrowChip.classList.toggle('selected', input.value === tomorrow);
+}
+
+function enforceMinTimeForDate(dateInputId, timeInputId) {
+    const dateInput = document.getElementById(dateInputId);
+    const timeInput = document.getElementById(timeInputId);
+    if (!dateInput || !timeInput) return;
+
+    const selectedDate = dateInput.value;
+    const today = getLocalDateString(0);
+    if (selectedDate === today) {
+        const minDate = new Date(Date.now() + (5 * 60 * 1000));
+        const minHours = String(minDate.getHours()).padStart(2, '0');
+        const minMinutes = String(minDate.getMinutes()).padStart(2, '0');
+        const minTime = minHours + ':' + minMinutes;
+        timeInput.min = minTime;
+        if (timeInput.value && timeInput.value < minTime) {
+            timeInput.value = '';
+        }
+        return;
+    }
+
+    timeInput.min = '00:00';
+}
+
+// ===== Step 2: Delivery schedule helpers =====
+function selectScheduleDate(el, type) {
+    const dateInput = document.getElementById('customDate');
+    if (!dateInput) return;
+
+    if (type === 'today') {
+        dateInput.value = getLocalDateString(0);
+    } else if (type === 'tomorrow') {
+        dateInput.value = getLocalDateString(1);
+    }
+
+    updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+    enforceMinTimeForDate('customDate', 'customTime');
 }
 
 // ===== Step 2: Pickup schedule helpers =====
 function selectPickupDate(el, type) {
-    document.querySelectorAll('#step2-pickup .schedule-option').forEach(opt => {
-        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
-        if (label === 'DATE') opt.classList.remove('selected');
-    });
-    el.classList.add('selected');
-}
+    const dateInput = document.getElementById('pickupCustomDate');
+    if (!dateInput) return;
 
-function selectPickupTime(el, type) {
-    document.querySelectorAll('#step2-pickup .schedule-option').forEach(opt => {
-        const label = opt.closest('div')?.previousElementSibling?.textContent?.trim();
-        if (label === 'TIME') opt.classList.remove('selected');
-    });
-    el.classList.add('selected');
+    if (type === 'today') {
+        dateInput.value = getLocalDateString(0);
+    } else if (type === 'tomorrow') {
+        dateInput.value = getLocalDateString(1);
+    }
+
+    updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+    enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
 }
 
 // ===== Step 3: Populate dynamic totals =====
@@ -738,7 +1035,7 @@ function populateReview() {
         document.getElementById('reviewDetailsLabel').textContent  = 'Pickup Details';
         document.getElementById('reviewAddressBadge').textContent  = 'LOCATION';
         document.getElementById('reviewArrivalBadge').textContent  = 'SCHEDULED PICKUP';
-        document.getElementById('reviewAddress').textContent = "Lola's Kusina Store — 123 Maligaya St., Quezon City";
+        document.getElementById('reviewAddress').textContent = "Lola's Kusina Store — " + STORE_ADDRESS;
     }
 
     // Schedule text
@@ -746,12 +1043,12 @@ function populateReview() {
     const dateInput = document.getElementById(isPickup ? 'pickupCustomDate' : 'customDate');
     const timeInput = document.getElementById(isPickup ? 'pickupCustomTime' : 'customTime');
     const defaultWait = isPickup ? '~ 30 mins' : '~ 45 mins';
-    let schedText = 'Today, ASAP (' + defaultWait + ')';
-    if (dateInput.value || timeInput.value) {
+    let schedText = '-';
+    if (dateInput.value && timeInput.value) {
         const d = dateInput.value
             ? new Date(dateInput.value + 'T00:00:00').toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'Today';
-        const t = timeInput.value || 'ASAP';
+        const t = timeInput.value;
         schedText = d + ', ' + t;
     }
     document.getElementById('reviewArrival').textContent = schedText;
@@ -806,6 +1103,46 @@ function showToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 2500);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    initMaps();
+    const addressInput = document.getElementById('deliveryAddress');
+    const customDateInput = document.getElementById('customDate');
+    const pickupCustomDateInput = document.getElementById('pickupCustomDate');
+    if (addressInput) {
+        addressInput.addEventListener('input', function () {
+            selectedDeliveryCoordinates = '';
+        });
+    }
+
+    if (customDateInput) {
+        if (!customDateInput.value) {
+            customDateInput.value = getLocalDateString(0);
+        }
+        updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+        enforceMinTimeForDate('customDate', 'customTime');
+
+        customDateInput.addEventListener('change', function () {
+            updateQuickDateState('customDate', 'deliveryDateToday', 'deliveryDateTomorrow');
+            enforceMinTimeForDate('customDate', 'customTime');
+        });
+    }
+
+    if (pickupCustomDateInput) {
+        if (!pickupCustomDateInput.value) {
+            pickupCustomDateInput.value = getLocalDateString(0);
+        }
+        updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+        enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
+
+        pickupCustomDateInput.addEventListener('change', function () {
+            updateQuickDateState('pickupCustomDate', 'pickupDateToday', 'pickupDateTomorrow');
+            enforceMinTimeForDate('pickupCustomDate', 'pickupCustomTime');
+        });
+    }
+
+    setTimeout(ensureMapLayout, 120);
+});
 </script>
 
 <?php include __DIR__ . '/layouts/footer.php'; ?>

@@ -5,7 +5,7 @@ $currentPage = "packages";
 include __DIR__ . '/layouts/header.php';
 ?>
 
-<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-3xl mb-20 md:mb-8">
+<div class="container mx-auto px-4 md:px-6 py-4 max-w-md md:max-w-4xl mb-20 md:mb-8">
     <!-- Back Button and Actions -->
     <div class="flex justify-between items-center mb-4">
         <button onclick="goBack()" class="bg-white rounded-full p-2 shadow-md">
@@ -28,12 +28,12 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Package Image -->
-    <div class="rounded-2xl overflow-hidden mb-6 bg-[#FFF3EE]" style="height:220px;">
+    <div class="rounded-2xl overflow-hidden mb-4 bg-[#FFF3EE]" style="height:220px;">
         <img src="<?php echo BASE_PATH; ?>/images/<?php echo htmlspecialchars($package['image'] ?? 'placeholder.svg'); ?>" alt="<?php echo htmlspecialchars($package['name'] ?? 'Package'); ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
     </div>
 
     <!-- Package Info -->
-    <div class="mb-6">
+    <div class="mb-4">
         <div class="flex justify-between items-start mb-2">
             <h1 class="text-2xl font-bold text-gray-800">Paborito Package</h1>
             <span class="text-2xl font-bold text-primary">₱<?php echo number_format($package['price'] ?? 2500, 2); ?></span>
@@ -58,9 +58,11 @@ include __DIR__ . '/layouts/header.php';
         </div>
     </div>
 
+    <div class="md:grid md:grid-cols-[1.65fr_1fr] md:gap-4 md:items-start">
+    <div>
     <!-- Package Contents -->
-    <div class="bg-white rounded-xl shadow-md p-4 mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Mga Kasama sa Package</h2>
+    <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+        <h2 class="text-base font-semibold text-gray-800 mb-3">Mga Kasama sa Package</h2>
         
         <?php
         $items = [
@@ -72,28 +74,30 @@ include __DIR__ . '/layouts/header.php';
         
         foreach ($items as $item):
         ?>
-        <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+        <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
             <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
+                    <div class="w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-[#FFF3EE]">
                     <img src="<?php echo BASE_PATH; ?>/images/<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?php echo BASE_PATH; ?>/images/placeholder.svg'">
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-800"><?php echo $item['name']; ?></h3>
+                    <h3 class="font-semibold text-sm text-gray-800"><?php echo $item['name']; ?></h3>
                     <p class="text-xs text-gray-500"><?php echo $item['description']; ?></p>
                 </div>
             </div>
-            <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
         </div>
         <?php endforeach; ?>
     </div>
+    </div>
 
+    <div class="md:sticky md:top-24 self-start">
     <!-- Quantity Selector -->
-    <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+    <div class="bg-white rounded-xl shadow-md p-4 mb-4">
         <div class="flex items-center justify-between">
             <span class="text-gray-700 font-semibold">Quantity</span>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
                 <button onclick="decreaseQuantity()" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
@@ -110,9 +114,11 @@ include __DIR__ . '/layouts/header.php';
     </div>
 
     <!-- Order Button -->
-    <a href="<?php echo BASE_PATH; ?>/cart.php" id="addToCartBtn" class="block w-full bg-primary text-white py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:bg-orange-600 transition">
+    <a href="<?php echo BASE_PATH; ?>/cart.php" id="addToCartBtn" class="block w-full bg-primary text-white py-3 rounded-xl font-bold text-base text-center shadow-lg hover:bg-orange-600 transition">
         ADD TO CART - ₱2,500.00
     </a>
+    </div>
+    </div>
 </div>
 
 <script>

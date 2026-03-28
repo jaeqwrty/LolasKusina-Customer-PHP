@@ -32,10 +32,10 @@ $orders = [
 ];
 ?>
 
-<div class="container mx-auto px-4 md:px-8 py-6 max-w-md md:max-w-4xl mb-20 md:mb-8">
+<div class="container mx-auto px-4 md:px-6 py-4 max-w-md md:max-w-4xl mb-20 md:mb-8">
 
     <!-- Header -->
-    <div class="flex items-center mb-6">
+    <div class="flex items-center mb-4">
         <a href="<?php echo BASE_PATH; ?>/profile.php" class="bg-white rounded-full p-2 shadow-md touch-feedback mr-3">
             <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -45,15 +45,15 @@ $orders = [
     </div>
 
     <!-- Filter Tabs -->
-    <div class="flex space-x-2 mb-5 overflow-x-auto pb-1 hide-scrollbar">
-        <button onclick="filterOrders('all')" class="order-filter-btn active bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap" data-filter="all">All Orders</button>
-        <button onclick="filterOrders('ongoing')" class="order-filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="ongoing">Ongoing</button>
-        <button onclick="filterOrders('delivered')" class="order-filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="delivered">Completed</button>
-        <button onclick="filterOrders('cancelled')" class="order-filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="cancelled">Cancelled</button>
+    <div class="flex space-x-2 mb-4 overflow-x-auto pb-1 hide-scrollbar">
+        <button onclick="filterOrders('all')" class="order-filter-btn active bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" data-filter="all">All Orders</button>
+        <button onclick="filterOrders('ongoing')" class="order-filter-btn bg-white text-gray-700 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="ongoing">Ongoing</button>
+        <button onclick="filterOrders('delivered')" class="order-filter-btn bg-white text-gray-700 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="delivered">Completed</button>
+        <button onclick="filterOrders('cancelled')" class="order-filter-btn bg-white text-gray-700 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm border border-gray-200" data-filter="cancelled">Cancelled</button>
     </div>
 
     <!-- Orders List -->
-    <div id="ordersList" class="space-y-4">
+    <div id="ordersList" class="space-y-3">
         <?php foreach ($orders as $order): ?>
         <?php
             $statusColor = match($order['status']) {
@@ -64,9 +64,9 @@ $orders = [
             };
             $statusFilter = strtolower($order['status']);
         ?>
-        <div class="order-card bg-white rounded-2xl shadow-md p-4" data-status="<?php echo $statusFilter; ?>">
+        <div class="order-card bg-white rounded-2xl shadow-sm border border-gray-100 p-3.5" data-status="<?php echo $statusFilter; ?>">
             <!-- Order Header -->
-            <div class="flex items-start justify-between mb-3">
+            <div class="flex items-start justify-between mb-2.5">
                 <div>
                     <span class="text-xs text-gray-400 font-medium">REF #<?php echo $order['ref']; ?></span>
                     <div class="text-sm font-semibold text-gray-800 mt-0.5"><?php echo $order['date']; ?></div>
@@ -77,30 +77,30 @@ $orders = [
             </div>
 
             <!-- Divider -->
-            <div class="border-t border-gray-100 mb-3"></div>
+            <div class="border-t border-gray-100 mb-2.5"></div>
 
             <!-- Package Name -->
-            <p class="text-sm text-gray-700 font-medium mb-1"><?php echo htmlspecialchars($order['name']); ?></p>
+            <p class="text-sm text-gray-700 font-medium mb-0.5"><?php echo htmlspecialchars($order['name']); ?></p>
 
             <!-- Price -->
-            <div class="mb-4">
+            <div class="mb-3">
                 <span class="text-xs text-gray-500">Total Price</span>
-                <div class="text-lg font-bold text-primary">₱<?php echo number_format($order['price'], 2); ?></div>
+                <div class="text-base font-bold text-primary">₱<?php echo number_format($order['price'], 2); ?></div>
             </div>
 
             <!-- Actions -->
             <div class="flex space-x-3">
                 <a href="<?php echo BASE_PATH; ?>/order_details.php?id=<?php echo $order['id']; ?>"
-                   class="flex-1 border-2 border-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold text-sm text-center hover:border-primary hover:text-primary transition touch-feedback">
+                   class="flex-1 border-2 border-gray-200 text-gray-700 py-2 rounded-xl font-semibold text-sm text-center hover:border-primary hover:text-primary transition touch-feedback">
                     View Details
                 </a>
                 <?php if ($order['status'] === 'Delivered'): ?>
                 <a href="<?php echo BASE_PATH; ?>/write_review.php?package=<?php echo $order['id']; ?>"
-                   class="flex-1 bg-primary text-white py-2.5 rounded-xl font-semibold text-sm text-center hover:bg-orange-600 transition touch-feedback shadow-sm">
+                   class="flex-1 bg-primary text-white py-2 rounded-xl font-semibold text-sm text-center hover:bg-orange-600 transition touch-feedback shadow-sm">
                     Mag-review
                 </a>
                 <?php else: ?>
-                <button class="flex-1 bg-gray-100 text-gray-400 py-2.5 rounded-xl font-semibold text-sm cursor-not-allowed">
+                <button class="flex-1 bg-gray-100 text-gray-400 py-2 rounded-xl font-semibold text-sm cursor-not-allowed">
                     Mag-review
                 </button>
                 <?php endif; ?>

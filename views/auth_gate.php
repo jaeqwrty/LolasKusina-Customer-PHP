@@ -8,20 +8,16 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 }
+require_once __DIR__ . '/helpers/view_helpers.php';
 
 // If already logged in, go straight to the app
 if (!empty($_SESSION['user_id'])) {
-    header('Location: ' . BASE_PATH . '/index.php');
+    header('Location: ' . getHomePath());
     exit;
 }
 
 $pageTitle = "Welcome - Lola's Kusina";
-$redirect = $_GET['redirect'] ?? BASE_PATH . '/index.php';
-
-// Validate redirect to only allow relative paths (prevent open redirect)
-if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
-    $redirect = BASE_PATH . '/index.php';
-}
+$redirect = sanitizeRedirectPath($_GET['redirect'] ?? null);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -182,7 +178,7 @@ if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
                     </a>
 
                     <!-- Tertiary Button: Continue as Guest -->
-                    <a href="<?php echo BASE_PATH; ?>/index.php"
+                    <a href="<?php echo BASE_PATH; ?>/"
                        class="w-full text-gray-700 py-2.5 rounded-lg font-medium text-sm text-center touch-feedback hover:text-primary transition duration-200">
                         Continue browsing as guest
                     </a>
@@ -288,7 +284,7 @@ if (!preg_match('/^\/[a-zA-Z0-9\-_.~!$&\'()*+,;=:@\/?%]*$/', $redirect)) {
                     </a>
 
                     <!-- Tertiary Button: Continue as Guest -->
-                    <a href="<?php echo BASE_PATH; ?>/index.php"
+                    <a href="<?php echo BASE_PATH; ?>/"
                        class="w-full text-gray-700 py-2.5 rounded-lg font-medium text-sm text-center touch-feedback hover:text-primary transition duration-200">
                         Continue browsing as guest
                     </a>
